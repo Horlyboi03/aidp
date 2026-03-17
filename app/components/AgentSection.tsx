@@ -10,24 +10,21 @@ export default function AgentSection() {
   useEffect(() => {
     const loadAgentImage = async () => {
       try {
-        // First try localStorage
-        const savedImage = localStorage.getItem('agentImage')
-        if (savedImage) {
-          setAgentImage(savedImage)
-          return
-        }
+        // Set default image immediately
+        setAgentImage("/images/mary-george.svg")
         
-        // Then try API
+        // Then try to load custom image from API
         const response = await fetch('/api/agent/image')
         if (response.ok) {
           const data = await response.json()
-          if (data.imageUrl) {
+          if (data.imageUrl && data.imageUrl !== "/images/mary-george.svg") {
             setAgentImage(data.imageUrl)
-            localStorage.setItem('agentImage', data.imageUrl)
           }
         }
       } catch (error) {
         console.error('Failed to load agent image:', error)
+        // Keep default image on error
+        setAgentImage("/images/mary-george.svg")
       }
     }
 
@@ -35,13 +32,8 @@ export default function AgentSection() {
 
     // Listen for agent image updates
     const handleImageUpdate = (event: any) => {
-      const newImageUrl = event.detail.imageUrl
+      const newImageUrl = event.detail.imageUrl || "/images/mary-george.svg"
       setAgentImage(newImageUrl)
-      if (newImageUrl) {
-        localStorage.setItem('agentImage', newImageUrl)
-      } else {
-        localStorage.removeItem('agentImage')
-      }
     }
 
     window.addEventListener('agentImageUpdated', handleImageUpdate)

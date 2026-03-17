@@ -221,10 +221,10 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* Chat Toggle Button - Responsive Size */}
       <motion.button
         onClick={openChat}
-        className="fixed bottom-6 right-6 z-50 btn-coral w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-2xl relative"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 btn-coral w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center text-xl md:text-2xl relative"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
@@ -233,7 +233,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold"
+            className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-red-500 text-white text-xs w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center font-bold"
           >
             {unreadCount}
           </motion.div>
