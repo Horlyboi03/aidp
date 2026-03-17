@@ -192,12 +192,11 @@ export default function AgentImageUpload() {
 
         {/* Upload Area */}
         <div className="flex-1">
-          <motion.div
+          <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-300 ${
               isDragActive ? 'border-coral-400 bg-coral-400/10' : 'border-gray-500 hover:border-coral-400'
             }`}
-            whileHover={{ scale: 1.01 }}
           >
             <input {...getInputProps()} />
             {uploading ? (
@@ -219,7 +218,7 @@ export default function AgentImageUpload() {
                 <p className="text-gray-400 text-sm mb-3">
                   JPG, PNG (Max 2MB)
                 </p>
-                <motion.button
+                <button
                   onClick={async () => {
                     const defaultImageUrl = "/images/mary-george.svg"
                     setUploading(true)
@@ -243,15 +242,13 @@ export default function AgentImageUpload() {
                       setUploading(false)
                     }
                   }}
-                  className="bg-coral-500 hover:bg-coral-600 text-white px-3 py-1 rounded text-xs"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="bg-coral-500 hover:bg-coral-600 text-white px-3 py-1 rounded text-xs transition-transform hover:scale-105 active:scale-95"
                 >
                   Use Default Image
-                </motion.button>
+                </button>
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
       </div>
 

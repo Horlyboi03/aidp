@@ -39,12 +39,11 @@ export default function FileUpload({ onFilesChange }: FileUploadProps) {
         Upload your National ID, Driver's License, or Passport (Max 3 files)
       </p>
 
-      <motion.div
+      <div
         {...getRootProps()}
         className={`form-input border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ${
           isDragActive ? 'border-coral-400 bg-coral-400/10' : 'border-gray-500 hover:border-coral-400'
         }`}
-        whileHover={{ scale: 1.01 }}
       >
         <input {...getInputProps()} />
         <div className="text-4xl mb-4">📄</div>
@@ -60,7 +59,7 @@ export default function FileUpload({ onFilesChange }: FileUploadProps) {
             </p>
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* File Preview */}
       {uploadedFiles.length > 0 && (

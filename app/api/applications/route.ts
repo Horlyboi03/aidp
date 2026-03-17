@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Application submission error:', error)
     return NextResponse.json(
-      { success: false, message: 'Failed to submit application', error: error.message },
+      { success: false, message: 'Failed to submit application', error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

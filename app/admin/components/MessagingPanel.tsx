@@ -298,7 +298,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 </div>
                 <p className="text-gray-400 text-sm truncate">{conv.lastMessage}</p>
                 <p className="text-gray-500 text-xs mt-1">
-                  {new Date(conv.messages[conv.messages.length - 1]?.timestamp || conv.createdAt).toLocaleString()}
+                  {new Date(conv.messages[conv.messages.length - 1]?.timestamp || Date.now()).toLocaleString()}
                 </p>
               </motion.div>
             ))}

@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       dateOfBirth: '1990-01-01',
       occupation: 'Tester',
       maritalStatus: 'single',
+      monthlyIncome: '$1,000 - $2,000',
       grantAmount: '$250,000',
       grantPurpose: 'medical',
       paymentMethod: 'cash',
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: 'Failed to create test application', error: error.message },
+      { success: false, message: 'Failed to create test application', error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -51,7 +52,7 @@ export async function GET() {
     })
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: 'Failed to get applications', error: error.message },
+      { success: false, message: 'Failed to get applications', error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
