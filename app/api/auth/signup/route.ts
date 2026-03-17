@@ -1,0 +1,64 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { userStore } from '../../../../lib/userStore'
+
+export async function POST(request: NextRequest) {
+  try {
+    const { fullName, email, phone, country, password } = await request.json()
+
+    // Validate required fields
+    if (!fullName || !email || !phone || !country || !password) {
+      return NextResponse.json(
+        { success: false, message: 'All fields are required' },
+        { status: 400 }
+      )
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid email format' },
+        { status: 400 }
+      )
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return NextResponse.json(
+        { success: false, message: 'Password must be at least 6 characters long' },
+        { status: 400 }
+      )
+    }
+
+    // Create user
+    const user = await userStore.createUser({
+      fullName,
+      email,
+      phone,
+      country,
+      password
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'User already exists with this email' },
+        { status: 409 }
+      )
+    }
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Account created successfully',
+      user: userWithoutPassword
+    })
+  } catch (error) {
+    console.error('Signup error:', error)
+    return NextResponse.json(
+      { success: false, message: 'Failed to create account' },
+      { status: 500 }
+    )
+  }
+}

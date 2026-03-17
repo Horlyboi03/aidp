@@ -1,0 +1,326 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
+
+interface Application {
+  id: string
+  fullName: string
+  email: string
+  country: string
+  grantAmount: string
+  status: 'pending' | 'approved' | 'rejected'
+  submittedAt: string
+}
+
+interface ApplicationsListProps {
+  onStatsUpdate?: () => void
+}
+
+export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProps) {
+  const [applications, setApplications] = useState<Application[]>([])
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchApplications()
+    
+    // Auto-refresh every 5 seconds to show new applications immediately
+    const interval = setInterval(fetchApplications, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const fetchApplications = async () => {
+    try {
+      console.log('Fetching applications...')
+      const response = await fetch('/api/applications')
+      console.log('Applications API response status:', response.status)
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Applications API data:', data)
+        console.log('Applications count:', data.applications?.length || 0)
+        
+        if (data.applications && Array.isArray(data.applications)) {
+          setApplications(data.applications)
+          console.log('Applications set:', data.applications)
+        } else {
+          console.log('No applications in response')
+          setApplications([])
+        }
+      } else {
+        console.error('Applications API failed with status:', response.status)
+        setApplications([])
+      }
+    } catch (error) {
+      console.error('Failed to fetch applications:', error)
+      toast.error('Failed to fetch applications')
+      setApplications([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateStatus = async (id: string, newStatus: 'approved' | 'rejected') => {
+    try {
+      const response = await fetch(`/api/applications/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (response.ok) {
+        // Update local state
+        setApplications(prev =>
+          prev.map(app =>
+            app.id === id ? { ...app, status: newStatus } : app
+          )
+        )
+        
+        // Update selected app if it's the one being updated
+        if (selectedApp && selectedApp.id === id) {
+          setSelectedApp(prev => prev ? { ...prev, status: newStatus } : null)
+        }
+        
+        toast.success(`Application ${newStatus}`)
+        
+        // Refresh the applications list to get updated data
+        fetchApplications()
+        
+        // Notify parent component to refresh stats
+        if (onStatsUpdate) {
+          onStatsUpdate()
+        }
+      } else {
+        toast.error('Failed to update status')
+      }
+    } catch (error) {
+      toast.error('Failed to update status')
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    const configs = {
+      pending: { bg: 'bg-yellow-500', text: 'Pending' },
+      approved: { bg: 'bg-green-500', text: 'Approved' },
+      rejected: { bg: 'bg-red-500', text: 'Rejected' }
+    }
+    const config = configs[status as keyof typeof configs]
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${config.bg}`}>
+        {config.text}
+      </span>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="glass-effect rounded-2xl p-8 text-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-8 h-8 border-2 border-coral-400 border-t-transparent rounded-full mx-auto"
+        />
+        <p className="text-gray-300 mt-4">Loading applications...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="glass-effect rounded-2xl p-6">
+      <h2 className="text-2xl font-bold text-white mb-6">Grant Applications</h2>
+      
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-white/20">
+              <th className="text-left py-3 px-4 text-gray-300 font-semibold">Applicant</th>
+              <th className="text-left py-3 px-4 text-gray-300 font-semibold">Country</th>
+              <th className="text-left py-3 px-4 text-gray-300 font-semibold">Grant Amount</th>
+              <th className="text-left py-3 px-4 text-gray-300 font-semibold">Status</th>
+              <th className="text-left py-3 px-4 text-gray-300 font-semibold">Submitted</th>
+              <th className="text-left py-3 px-4 text-gray-300 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+                  {applications.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center">
+                  <div className="text-gray-400">
+                    <div className="text-4xl mb-4">📋</div>
+                    <p className="text-lg font-medium">No applications yet</p>
+                    <p className="text-sm">Applications will appear here once submitted</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              applications.map((app, index) => (
+                <motion.tr
+                  key={app.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="border-b border-white/10 hover:bg-white/5 transition-colors"
+                >
+                  <td className="py-4 px-4">
+                    <div>
+                      <p className="text-white font-medium">{app.fullName}</p>
+                      <p className="text-gray-400 text-sm">{app.email}</p>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-gray-300">{app.country}</td>
+                  <td className="py-4 px-4 text-coral-400 font-semibold">{app.grantAmount}</td>
+                  <td className="py-4 px-4">{getStatusBadge(app.status)}</td>
+                  <td className="py-4 px-4 text-gray-300">
+                    {new Date(app.submittedAt).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex space-x-2">
+                      {app.status === 'pending' && (
+                        <>
+                          <motion.button
+                            onClick={() => updateStatus(app.id, 'approved')}
+                            className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded transition-colors"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Approve
+                          </motion.button>
+                          <motion.button
+                            onClick={() => updateStatus(app.id, 'rejected')}
+                            className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Reject
+                          </motion.button>
+                        </>
+                      )}
+                      <motion.button
+                        onClick={() => setSelectedApp(app)}
+                        className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded transition-colors"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        View
+                      </motion.button>
+                    </div>
+                  </td>
+                </motion.tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Application Detail Modal */}
+      {selectedApp && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedApp(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-effect rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-white">Application Details</h3>
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-400 text-sm">Application ID</label>
+                  <p className="text-white font-medium">{selectedApp.id}</p>
+                </div>
+                <div>
+                  <label className="text-gray-400 text-sm">Status</label>
+                  <div className="mt-1">{getStatusBadge(selectedApp.status)}</div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-400 text-sm">Full Name</label>
+                  <p className="text-white font-medium">{selectedApp.fullName}</p>
+                </div>
+                <div>
+                  <label className="text-gray-400 text-sm">Email</label>
+                  <p className="text-white font-medium">{selectedApp.email}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-400 text-sm">Country</label>
+                  <p className="text-white font-medium">{selectedApp.country}</p>
+                </div>
+                <div>
+                  <label className="text-gray-400 text-sm">Marital Status</label>
+                  <p className="text-white font-medium capitalize">{(selectedApp as any).maritalStatus || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-400 text-sm">Grant Amount</label>
+                  <p className="text-coral-400 font-semibold">{selectedApp.grantAmount}</p>
+                </div>
+                <div>
+                  <label className="text-gray-400 text-sm">Grant Purpose</label>
+                  <p className="text-white font-medium capitalize">{(selectedApp as any).grantPurpose || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-400 text-sm">Payment Method</label>
+                  <p className="text-white font-medium capitalize">{(selectedApp as any).paymentMethod || 'Not specified'}</p>
+                </div>
+                <div>
+                  <label className="text-gray-400 text-sm">Phone</label>
+                  <p className="text-white font-medium">{(selectedApp as any).phone || 'Not provided'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-gray-400 text-sm">Occupation</label>
+                <p className="text-white font-medium">{(selectedApp as any).occupation || 'Not provided'}</p>
+              </div>
+              
+              <div>
+                <label className="text-gray-400 text-sm">Monthly Income</label>
+                <p className="text-white font-medium capitalize">{(selectedApp as any).monthlyIncome?.replace('-', ' - $') || 'Not provided'}</p>
+              </div>
+              
+              {(selectedApp as any).description && (
+                <div>
+                  <label className="text-gray-400 text-sm">Additional Details</label>
+                  <p className="text-white font-medium">{(selectedApp as any).description}</p>
+                </div>
+              )}
+              
+              <div>
+                <label className="text-gray-400 text-sm">Submitted Date</label>
+                <p className="text-white font-medium">
+                  {new Date(selectedApp.submittedAt).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </div>
+  )
+}

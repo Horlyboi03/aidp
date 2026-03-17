@@ -1,0 +1,350 @@
+'use client'
+
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import toast from 'react-hot-toast'
+
+interface Message {
+  id: string
+  text: string
+  sender: 'user' | 'admin'
+  timestamp: Date
+  senderName: string
+  delivered?: boolean
+  read?: boolean
+}
+
+interface LiveChatWidgetProps {
+  user?: any
+  token?: string | null
+}
+
+export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [inputText, setInputText] = useState('')
+  const [isConnected, setIsConnected] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const conversationId = user ? `conv-${user.id}` : `conv-guest-${Date.now()}`
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  // Load existing conversation when chat opens
+  useEffect(() => {
+    if (isOpen && user) {
+      loadConversation()
+      // Poll for new messages every 3 seconds when chat is open
+      const interval = setInterval(loadConversation, 3000)
+      return () => clearInterval(interval)
+    }
+  }, [isOpen, user])
+
+
+
+  // Poll for new messages when chat is closed (for unread count)
+  useEffect(() => {
+    if (!isOpen && user) {
+      const interval = setInterval(checkForNewMessages, 10000)
+      return () => clearInterval(interval)
+    }
+  }, [isOpen, user])
+
+  const loadConversation = async () => {
+    if (!user) return
+    
+    try {
+      const response = await fetch(`/api/messages?conversationId=${conversationId}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.conversation && data.conversation.messages) {
+          const formattedMessages = data.conversation.messages.map((msg: any) => ({
+            id: msg.id,
+            text: msg.message,
+            sender: msg.isAdmin ? 'admin' : 'user',
+            timestamp: new Date(msg.timestamp),
+            senderName: msg.isAdmin ? 'Mary George' : user.fullName,
+            delivered: msg.delivered || true,
+            read: msg.read || false
+          }))
+          setMessages(formattedMessages)
+          setIsConnected(true)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load conversation:', error)
+    }
+  }
+
+  const openChat = () => {
+    setIsOpen(true)
+    setUnreadCount(0)
+    if (user) {
+      // Mark admin messages as read when user opens chat
+      fetch('/api/messages', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId,
+          markAdminMessagesAsRead: true
+        })
+      }).then(() => {
+        // Refresh conversation to get updated read status
+        loadConversation()
+      })
+    }
+  }
+
+  const checkForNewMessages = async () => {
+    if (!user) return
+    
+    try {
+      const response = await fetch(`/api/messages?conversationId=${conversationId}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.conversation && data.conversation.messages) {
+          const newMessageCount = data.conversation.messages.filter((msg: any) => 
+            !msg.isAdmin && !msg.read
+          ).length
+          setUnreadCount(newMessageCount)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check for new messages:', error)
+    }
+  }
+
+  const sendMessage = async () => {
+    if (!inputText.trim() || !user) return
+
+    const messageText = inputText
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: messageText,
+      sender: 'user',
+      timestamp: new Date(),
+      senderName: user.fullName,
+      delivered: true,
+      read: false
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setInputText('')
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          conversationId,
+          sender: user.fullName,
+          message: messageText,
+          isAdmin: false,
+          applicantName: user.fullName,
+          applicantEmail: user.email
+        })
+      })
+
+      if (response.ok) {
+        console.log('Message sent successfully')
+        toast.success('Message sent to Mary George!')
+      } else {
+        throw new Error('Failed to send message')
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error)
+      toast.error('Failed to send message. Please try again.')
+      // Remove the message from UI if sending failed
+      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id))
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
+
+  // Listen for openChat events
+  useEffect(() => {
+    const handleOpenChat = (event: any) => {
+      setIsOpen(true)
+      setUnreadCount(0)
+      // If there's a pre-filled message in the event, set it
+      if (event.detail?.message) {
+        setInputText(event.detail.message)
+      }
+      // Mark admin messages as read when user opens chat
+      if (user) {
+        fetch('/api/messages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId,
+            markAdminMessagesAsRead: true
+          })
+        }).then(() => {
+          loadConversation()
+        })
+      }
+    }
+
+    window.addEventListener('openChat', handleOpenChat)
+    return () => window.removeEventListener('openChat', handleOpenChat)
+  }, [user, conversationId])
+
+  if (!user) {
+    return (
+      <motion.div
+        className="fixed bottom-6 right-6 z-50"
+        whileHover={{ scale: 1.05 }}
+      >
+        <div className="bg-coral-gradient p-4 rounded-full shadow-lg">
+          <div className="text-white text-center">
+            <div className="text-2xl mb-2">💬</div>
+            <p className="text-sm font-semibold">Sign in to chat with Mary George</p>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
+  return (
+    <>
+      {/* Chat Toggle Button */}
+      <motion.button
+        onClick={openChat}
+        className="fixed bottom-6 right-6 z-50 btn-coral w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-2xl relative"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        💬
+        {unreadCount > 0 && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold"
+          >
+            {unreadCount}
+          </motion.div>
+        )}
+      </motion.button>
+
+      {/* Chat Window */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 100, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 100, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-24 right-6 z-40 w-96 h-[500px] glass-effect rounded-2xl overflow-hidden flex flex-col"
+          >
+            {/* Chat Header */}
+            <div className="bg-coral-gradient p-4 text-white flex justify-between items-center">
+              <div>
+                <h3 className="font-semibold">Chat with Mary George</h3>
+                <p className="text-sm opacity-90 flex items-center">
+                  <span className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-400' : 'bg-gray-400'}`}></span>
+                  {isConnected ? 'Connected' : 'Connecting...'}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white hover:text-gray-200 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3">
+              {messages.length === 0 && (
+                <div className="text-center text-gray-400 py-8">
+                  <div className="text-4xl mb-2">👋</div>
+                  <p>Start a conversation with Mary George!</p>
+                  <p className="text-sm mt-2">She'll respond as soon as possible.</p>
+                </div>
+              )}
+              
+              {messages.map((message) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                      message.sender === 'user'
+                        ? 'bg-coral-gradient text-white'
+                        : 'glass-effect text-gray-200 border border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="font-semibold text-xs">
+                        {message.senderName}
+                      </span>
+                      <span className="text-xs opacity-70">
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p>{message.text}</p>
+                    
+                    {/* Message Status for User Messages */}
+                    {message.sender === 'user' && (
+                      <div className="flex justify-end mt-1">
+                        {message.delivered && (
+                          <span className={`text-xs ${message.read ? 'text-blue-400' : 'text-gray-400'}`}>
+                            {message.read ? '✓✓' : '✓'}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="p-4 border-t border-white/20">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your message to Mary..."
+                  className="flex-1 form-input px-3 py-2 rounded-lg text-sm"
+                />
+                <motion.button
+                  onClick={sendMessage}
+                  disabled={!inputText.trim()}
+                  className="btn-coral px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Send
+                </motion.button>
+              </div>
+              <p className="text-xs text-gray-400 mt-2 text-center">
+                Messages are sent directly to Mary George (marygeorge193@gmail.com)
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
