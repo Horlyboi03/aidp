@@ -11,8 +11,10 @@
   "dependencies": {
     "@headlessui/react": "^2.0.0",
     "@heroicons/react": "^2.1.0",
+    "@neondatabase/serverless": "^1.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@vercel/postgres": "^0.10.0",
     "axios": "^1.7.0",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^11.0.0",

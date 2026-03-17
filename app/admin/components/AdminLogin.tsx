@@ -21,13 +21,25 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const onSubmit = async (data: LoginData) => {
     setLoading(true)
     
-    // Mock authentication - in a real app, this would be a proper API call
-    if (data.username === 'admin' && data.password === 'aidp2024') {
-      localStorage.setItem('adminToken', 'mock-jwt-token')
-      toast.success('Login successful!')
-      onLogin()
-    } else {
-      toast.error('Invalid credentials')
+    try {
+      // Call API to verify credentials
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        localStorage.setItem('adminToken', result.token)
+        toast.success('Login successful!')
+        onLogin()
+      } else {
+        const error = await response.json()
+        toast.error(error.message || 'Invalid credentials')
+      }
+    } catch (error) {
+      toast.error('Login failed. Please try again.')
     }
     
     setLoading(false)
@@ -90,14 +102,6 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
               {loading ? 'Signing In...' : 'Sign In'}
             </motion.button>
           </form>
-
-          <div className="mt-6 p-4 glass-effect rounded-xl">
-            <p className="text-sm text-gray-400 text-center">
-              Demo Credentials:<br />
-              Username: <span className="text-coral-400">admin</span><br />
-              Password: <span className="text-coral-400">aidp2024</span>
-            </p>
-          </div>
         </div>
       </motion.div>
     </section>
