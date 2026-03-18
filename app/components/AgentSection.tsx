@@ -4,27 +4,29 @@ import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 
 export default function AgentSection() {
-  const [agentImage, setAgentImage] = useState<string | null>(null)
+  const [agentImage, setAgentImage] = useState<string>("/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg")
 
   // Load agent image on component mount
   useEffect(() => {
     const loadAgentImage = async () => {
       try {
-        // Set default image immediately
-        setAgentImage("/images/mary-george.svg")
+        // Set default image immediately so it always shows
+        const defaultImage = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
+        setAgentImage(defaultImage)
         
         // Then try to load custom image from API
         const response = await fetch('/api/agent/image')
         if (response.ok) {
           const data = await response.json()
-          if (data.imageUrl && data.imageUrl !== "/images/mary-george.svg") {
+          // Only update if there's a different custom image
+          if (data.imageUrl && data.imageUrl !== defaultImage) {
             setAgentImage(data.imageUrl)
           }
         }
       } catch (error) {
         console.error('Failed to load agent image:', error)
-        // Keep default image on error
-        setAgentImage("/images/mary-george.svg")
+        // Ensure default image is set even on error
+        setAgentImage("/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg")
       }
     }
 
@@ -32,7 +34,7 @@ export default function AgentSection() {
 
     // Listen for agent image updates
     const handleImageUpdate = (event: any) => {
-      const newImageUrl = event.detail.imageUrl || "/images/mary-george.svg"
+      const newImageUrl = event.detail.imageUrl || "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
       setAgentImage(newImageUrl)
     }
 
@@ -64,32 +66,16 @@ export default function AgentSection() {
           >
             <div className="w-full h-full rounded-2xl bg-gradient-to-br from-coral-400 to-pink-500 p-1">
               <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-800">
-                {agentImage ? (
-                  <img
-                    src={agentImage}
-                    alt="Mary George - Program Director"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback to default image if uploaded image fails
-                      e.currentTarget.src = "/images/mary-george.svg"
-                    }}
-                  />
-                ) : (
-                  <img
-                    src="/images/mary-george.svg"
-                    alt="Mary George - Program Director"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Final fallback to emoji if all images fail
-                      e.currentTarget.style.display = 'none'
-                      const emojiDiv = e.currentTarget.nextElementSibling as HTMLElement
-                      if (emojiDiv) emojiDiv.style.display = 'flex'
-                    }}
-                  />
-                )}
-                <div className="w-full h-full hidden items-center justify-center text-6xl">
-                  👩‍💼
-                </div>
+                <img
+                  src={agentImage}
+                  alt="Mary George - Program Director"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to default image if current image fails
+                    console.error('Image failed to load:', agentImage)
+                    e.currentTarget.src = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
+                  }}
+                />
               </div>
             </div>
           </motion.div>

@@ -23,7 +23,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
-  const [agentImage, setAgentImage] = useState<string | null>(null)
+  const [agentImage, setAgentImage] = useState<string>("/images/mary-george.svg")
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -35,15 +35,19 @@ export default function Home() {
       setToken(savedToken)
     }
 
-    // Load agent image from localStorage
+    // Load agent image - always start with default
+    const defaultImage = "/images/mary-george.svg"
+    setAgentImage(defaultImage)
+    
+    // Then check for custom image
     const savedAgentImage = localStorage.getItem('agentImage')
-    if (savedAgentImage) {
+    if (savedAgentImage && savedAgentImage !== defaultImage) {
       setAgentImage(savedAgentImage)
     }
 
     // Listen for agent image updates
     const handleImageUpdate = (event: any) => {
-      const newImageUrl = event.detail.imageUrl
+      const newImageUrl = event.detail.imageUrl || defaultImage
       setAgentImage(newImageUrl)
       if (newImageUrl) {
         localStorage.setItem('agentImage', newImageUrl)
@@ -116,18 +120,14 @@ export default function Home() {
                   <div className="w-full h-full rounded-lg bg-gradient-to-br from-coral-400 to-pink-500 p-1">
                     <div className="w-full h-full rounded-lg overflow-hidden bg-gray-800">
                       <img
-                        src={agentImage || "/images/mary-george.svg"}
+                        src={agentImage}
                         alt="Mary George"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                          const emojiDiv = e.currentTarget.nextElementSibling as HTMLElement
-                          if (emojiDiv) emojiDiv.style.display = 'flex'
+                          console.error('Welcome bar image failed to load')
+                          e.currentTarget.src = "/images/mary-george.svg"
                         }}
                       />
-                      <div className="w-full h-full hidden items-center justify-center text-lg" style={{ display: 'none' }}>
-                        👩‍💼
-                      </div>
                     </div>
                   </div>
                 </div>
