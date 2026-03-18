@@ -1,0 +1,3 @@
+The admin application view modal needs white background with dark text for better readability.
+All labels should be gray-700 and values should be gray-900.
+Grid should be responsive: 1 column on mobile, 2 columns on desktop.

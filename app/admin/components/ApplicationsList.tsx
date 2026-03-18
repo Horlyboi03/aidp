@@ -299,7 +299,7 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
         </table>
       </div>
 
-      {/* Application Detail Modal - Responsive */}
+      {/* Application Detail Modal - Responsive with White Background */}
       {selectedApp && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -310,14 +310,14 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="glass-effect rounded-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/98 backdrop-blur-xl rounded-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4 md:mb-6">
-              <h3 className="text-xl md:text-2xl font-bold text-white">Application Details</h3>
+            <div className="flex justify-between items-center mb-4 md:mb-6 pb-4 border-b border-gray-200">
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900">Application Details</h3>
               <button
                 onClick={() => setSelectedApp(null)}
-                className="text-gray-400 hover:text-white text-2xl"
+                className="text-gray-600 hover:text-gray-900 text-3xl leading-none"
               >
                 ×
               </button>
@@ -326,82 +326,112 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-400 text-sm">Application ID</label>
-                  <p className="text-white font-medium">{selectedApp.id}</p>
+                  <label className="text-gray-700 text-sm font-semibold">Application ID</label>
+                  <p className="text-gray-900 font-medium">{selectedApp.id}</p>
                 </div>
                 <div>
-                  <label className="text-gray-400 text-sm">Status</label>
+                  <label className="text-gray-700 text-sm font-semibold">Status</label>
                   <div className="mt-1">{getStatusBadge(selectedApp.status)}</div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-400 text-sm">Full Name</label>
-                  <p className="text-white font-medium">{selectedApp.fullName}</p>
+                  <label className="text-gray-700 text-sm font-semibold">Full Name</label>
+                  <p className="text-gray-900 font-medium">{selectedApp.fullName}</p>
                 </div>
                 <div>
-                  <label className="text-gray-400 text-sm">Email</label>
-                  <p className="text-white font-medium">{selectedApp.email}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-gray-400 text-sm">Country</label>
-                  <p className="text-white font-medium">{selectedApp.country}</p>
-                </div>
-                <div>
-                  <label className="text-gray-400 text-sm">Marital Status</label>
-                  <p className="text-white font-medium capitalize">{(selectedApp as any).maritalStatus || 'Not specified'}</p>
+                  <label className="text-gray-700 text-sm font-semibold">Email</label>
+                  <p className="text-gray-900 font-medium break-all">{selectedApp.email}</p>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-400 text-sm">Grant Amount</label>
-                  <p className="text-coral-400 font-semibold">{selectedApp.grantAmount}</p>
+                  <label className="text-gray-700 text-sm font-semibold">Country</label>
+                  <p className="text-gray-900 font-medium">{selectedApp.country}</p>
                 </div>
                 <div>
-                  <label className="text-gray-400 text-sm">Grant Purpose</label>
-                  <p className="text-white font-medium capitalize">{(selectedApp as any).grantPurpose || 'Not specified'}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-gray-400 text-sm">Payment Method</label>
-                  <p className="text-white font-medium capitalize">{(selectedApp as any).paymentMethod || 'Not specified'}</p>
-                </div>
-                <div>
-                  <label className="text-gray-400 text-sm">Phone</label>
-                  <p className="text-white font-medium">{(selectedApp as any).phone || 'Not provided'}</p>
+                  <label className="text-gray-700 text-sm font-semibold">Marital Status</label>
+                  <p className="text-gray-900 font-medium capitalize">{(selectedApp as any).maritalStatus || 'Not specified'}</p>
                 </div>
               </div>
               
-              <div>
-                <label className="text-gray-400 text-sm">Occupation</label>
-                <p className="text-white font-medium">{(selectedApp as any).occupation || 'Not provided'}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-700 text-sm font-semibold">Grant Amount</label>
+                  <p className="text-coral-600 font-semibold text-lg">{selectedApp.grantAmount}</p>
+                </div>
+                <div>
+                  <label className="text-gray-700 text-sm font-semibold">Grant Purpose</label>
+                  <p className="text-gray-900 font-medium capitalize">{(selectedApp as any).grantPurpose || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-700 text-sm font-semibold">Payment Method</label>
+                  <p className="text-gray-900 font-medium capitalize">{(selectedApp as any).paymentMethod || 'Not specified'}</p>
+                </div>
+                <div>
+                  <label className="text-gray-700 text-sm font-semibold">Phone</label>
+                  <p className="text-gray-900 font-medium">{(selectedApp as any).phone || 'Not provided'}</p>
+                </div>
               </div>
               
               <div>
-                <label className="text-gray-400 text-sm">Monthly Income</label>
-                <p className="text-white font-medium capitalize">{(selectedApp as any).monthlyIncome?.replace('-', ' - $') || 'Not provided'}</p>
+                <label className="text-gray-700 text-sm font-semibold">Occupation</label>
+                <p className="text-gray-900 font-medium">{(selectedApp as any).occupation || 'Not provided'}</p>
+              </div>
+              
+              <div>
+                <label className="text-gray-700 text-sm font-semibold">Monthly Income</label>
+                <p className="text-gray-900 font-medium capitalize">{(selectedApp as any).monthlyIncome?.replace('-', ' - $') || 'Not provided'}</p>
               </div>
               
               {(selectedApp as any).description && (
                 <div>
-                  <label className="text-gray-400 text-sm">Additional Details</label>
-                  <p className="text-white font-medium">{(selectedApp as any).description}</p>
+                  <label className="text-gray-700 text-sm font-semibold">Additional Details</label>
+                  <p className="text-gray-900 font-medium">{(selectedApp as any).description}</p>
                 </div>
               )}
               
               <div>
-                <label className="text-gray-400 text-sm">Submitted Date</label>
-                <p className="text-white font-medium">
+                <label className="text-gray-700 text-sm font-semibold">Submitted Date</label>
+                <p className="text-gray-900 font-medium">
                   {new Date(selectedApp.submittedAt).toLocaleString()}
                 </p>
               </div>
+              
+              {/* Action Buttons - Responsive */}
+              {selectedApp.status === 'pending' && (
+                <div className="flex flex-col md:flex-row gap-3 pt-4 border-t border-gray-200">
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      updateStatus(selectedApp.id, 'approved')
+                      setSelectedApp(null)
+                    }}
+                    className="flex-1 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    ✓ Approve Application
+                  </motion.button>
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      updateStatus(selectedApp.id, 'rejected')
+                      setSelectedApp(null)
+                    }}
+                    className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    ✗ Reject Application
+                  </motion.button>
+                </div>
+              )}
             </div>
           </motion.div>
         </motion.div>
