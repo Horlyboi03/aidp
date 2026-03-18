@@ -124,7 +124,7 @@ export default function AgentSection() {
             </p>
             <div className="pt-4 border-t border-white/20">
               <p className="text-coral-400 font-semibold">
-                📧 Contact Mary: marygeorge193@gmail.com
+                📧 Contact Mary: maryygeorge193@gmail.com
               </p>
             </div>
           </motion.div>

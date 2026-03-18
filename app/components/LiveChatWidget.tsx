@@ -341,7 +341,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
                 </motion.button>
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                Messages are sent directly to Mary George (marygeorge193@gmail.com)
+                Messages are sent directly to Mary George (maryygeorge193@gmail.com)
               </p>
             </div>
           </motion.div>

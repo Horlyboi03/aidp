@@ -182,7 +182,7 @@ export default function ApplicationStatus({ applicationId, onBack }: Application
                     💬 Chat with Admin
                   </motion.button>
                   <span className="text-gray-400 text-sm">
-                    Or email: marygeorge193@gmail.com
+                    Or email: maryygeorge193@gmail.com
                   </span>
                 </div>
               </div>

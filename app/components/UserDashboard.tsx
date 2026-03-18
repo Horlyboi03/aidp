@@ -209,7 +209,7 @@ export default function UserDashboard({ user, token, onSignOut, onApplyNew }: Us
                         <p>• Check your email for payment instructions</p>
                         <p>• Complete the processing fee payment</p>
                         <p>• Your grant will be released within 48 hours after payment</p>
-                        <p>• Contact support if you need assistance: marygeorge193@gmail.com</p>
+                        <p>• Contact support if you need assistance: maryygeorge193@gmail.com</p>
                       </div>
                       <div className="mt-3 pt-3 border-t border-white/20">
                         <p className="text-green-200 font-medium text-sm flex items-center">

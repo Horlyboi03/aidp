@@ -219,7 +219,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                   })}
                   type="email"
                   className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
-                  placeholder="marygeorge193@gmail.com"
+                  placeholder="maryygeorge193@gmail.com"
                   disabled={loading}
                 />
                 {errorsForgot.email && (

@@ -78,7 +78,7 @@ export function getApprovalEmailTemplate(applicantName: string, grantAmount: str
           
           <p>If you have any questions, please contact our Program Director:</p>
           <p><strong>Mary George</strong><br>
-          Email: marygeorge193@gmail.com</p>
+          Email: maryygeorge193@gmail.com</p>
           
           <p>Thank you for applying to the AIDP Grant Program!</p>
           
@@ -131,7 +131,7 @@ export function getRejectionEmailTemplate(applicantName: string): string {
           <p>If you believe this decision was made in error or if you have additional information to support your application, please contact our Program Director:</p>
           
           <p><strong>Mary George</strong><br>
-          Email: marygeorge193@gmail.com</p>
+          Email: maryygeorge193@gmail.com</p>
           
           <p>We appreciate your understanding and wish you the best in your future endeavors.</p>
           

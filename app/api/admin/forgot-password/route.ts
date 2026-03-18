@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json()
 
     // Verify this is the admin email
-    const ADMIN_EMAIL = 'marygeorge193@gmail.com'
+    const ADMIN_EMAIL = 'maryygeorge193@gmail.com'
     
     if (email !== ADMIN_EMAIL) {
       return NextResponse.json(
@@ -39,13 +39,13 @@ export async function POST(request: NextRequest) {
         port: parseInt(process.env.EMAIL_PORT || '587'),
         secure: false,
         auth: {
-          user: process.env.EMAIL_USER || 'marygeorge193@gmail.com',
+          user: process.env.EMAIL_USER || 'maryygeorge193@gmail.com',
           pass: process.env.EMAIL_PASS || 'your-app-password'
         }
       })
 
       await transporter.sendMail({
-        from: process.env.EMAIL_FROM || 'AIDP Admin <marygeorge193@gmail.com>',
+        from: process.env.EMAIL_FROM || 'AIDP Admin <maryygeorge193@gmail.com>',
         to: email,
         subject: 'AIDP Admin - Password Reset OTP',
         html: `
@@ -140,7 +140,7 @@ export async function PUT(request: NextRequest) {
   try {
     const { email, otp, newPassword } = await request.json()
 
-    const ADMIN_EMAIL = 'marygeorge193@gmail.com'
+    const ADMIN_EMAIL = 'maryygeorge193@gmail.com'
     
     if (email !== ADMIN_EMAIL) {
       return NextResponse.json(
