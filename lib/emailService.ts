@@ -1,8 +1,5 @@
 // Email service for sending notifications
-// NOTE: Requires nodemailer to be installed: npm install nodemailer @types/nodemailer
-
-// Uncomment the following lines after installing nodemailer:
-// import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer'
 
 interface EmailOptions {
   to: string
@@ -10,18 +7,8 @@ interface EmailOptions {
   html: string
 }
 
-// Email configuration
-// You'll need to set these environment variables in .env.local:
-// EMAIL_HOST=smtp.gmail.com
-// EMAIL_PORT=587
-// EMAIL_USER=your-email@gmail.com
-// EMAIL_PASS=your-app-password
-// EMAIL_FROM=AIDP Grant Program <noreply@aidp.com>
-
 export async function sendEmail({ to, subject, html }: EmailOptions): Promise<boolean> {
   try {
-    // Uncomment after installing nodemailer:
-    /*
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -38,16 +25,11 @@ export async function sendEmail({ to, subject, html }: EmailOptions): Promise<bo
       subject,
       html,
     })
-    */
 
-    console.log('Email would be sent to:', to)
-    console.log('Subject:', subject)
-    console.log('HTML:', html)
-    
-    // For now, just log the email (remove this after implementing nodemailer)
+    console.log('✅ Email sent successfully to:', to)
     return true
   } catch (error) {
-    console.error('Failed to send email:', error)
+    console.error('❌ Failed to send email:', error)
     return false
   }
 }
