@@ -46,7 +46,21 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   }
 
   return (
-    <section className="min-h-screen flex items-center justify-center px-4">
+    <section className="min-h-screen flex items-center justify-center px-4 relative">
+      {/* Logo Header - Same size as homepage */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="absolute top-4 left-4 md:top-8 md:left-8 z-20"
+      >
+        <img
+          src="/images/aidp-logo-white.svg"
+          alt="AIDP Grant Program"
+          className="w-16 h-16 md:w-24 md:h-24 lg:w-32 lg:h-32 drop-shadow-2xl hover:scale-110 transition-transform duration-300"
+        />
+      </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

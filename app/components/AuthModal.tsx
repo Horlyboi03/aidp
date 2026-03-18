@@ -108,16 +108,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="glass-effect rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-gray-900">
                 {isSignUp ? 'Create Account' : 'Sign In'}
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white text-2xl"
+                className="text-gray-600 hover:text-gray-900 text-2xl"
               >
                 ×
               </button>
@@ -126,10 +126,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             {isSignUp ? (
               <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
                 <div>
-                  <label className="block text-white font-semibold mb-2">Full Name *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Full Name *</label>
                   <input
                     {...signUpForm.register('fullName', { required: 'Full name is required' })}
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your full name"
                   />
                   {signUpForm.formState.errors.fullName && (
@@ -138,14 +138,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Email *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Email *</label>
                   <input
                     {...signUpForm.register('email', { 
                       required: 'Email is required',
                       pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' }
                     })}
                     type="email"
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your email"
                   />
                   {signUpForm.formState.errors.email && (
@@ -154,10 +154,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Phone *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Phone *</label>
                   <input
                     {...signUpForm.register('phone', { required: 'Phone number is required' })}
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your phone number"
                   />
                   {signUpForm.formState.errors.phone && (
@@ -166,10 +166,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Country *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Country *</label>
                   <input
                     {...signUpForm.register('country', { required: 'Country is required' })}
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your country"
                   />
                   {signUpForm.formState.errors.country && (
@@ -178,14 +178,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Password *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Password *</label>
                   <input
                     {...signUpForm.register('password', { 
                       required: 'Password is required',
                       minLength: { value: 6, message: 'Password must be at least 6 characters' }
                     })}
                     type="password"
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your password"
                   />
                   {signUpForm.formState.errors.password && (
@@ -194,11 +194,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Confirm Password *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Confirm Password *</label>
                   <input
                     {...signUpForm.register('confirmPassword', { required: 'Please confirm your password' })}
                     type="password"
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Confirm your password"
                   />
                   {signUpForm.formState.errors.confirmPassword && (
@@ -219,14 +219,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             ) : (
               <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-4">
                 <div>
-                  <label className="block text-white font-semibold mb-2">Email *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Email *</label>
                   <input
                     {...signInForm.register('email', { 
                       required: 'Email is required',
                       pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' }
                     })}
                     type="email"
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your email"
                   />
                   {signInForm.formState.errors.email && (
@@ -235,11 +235,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Password *</label>
+                  <label className="block text-gray-900 font-semibold mb-2">Password *</label>
                   <input
                     {...signInForm.register('password', { required: 'Password is required' })}
                     type="password"
-                    className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your password"
                   />
                   {signInForm.formState.errors.password && (
@@ -260,11 +260,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             )}
 
             <div className="mt-6 text-center">
-              <p className="text-gray-300">
+              <p className="text-gray-700">
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                 <button
                   onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-coral-400 hover:text-coral-300 ml-2 font-semibold"
+                  className="text-coral-600 hover:text-coral-700 ml-2 font-semibold"
                 >
                   {isSignUp ? 'Sign In' : 'Sign Up'}
                 </button>

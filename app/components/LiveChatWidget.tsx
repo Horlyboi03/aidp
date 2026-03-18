@@ -205,17 +205,19 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
 
   if (!user) {
     return (
-      <motion.div
-        className="fixed bottom-6 right-6 z-50"
-        whileHover={{ scale: 1.05 }}
+      <motion.button
+        onClick={() => {
+          // Trigger auth modal to open
+          const event = new CustomEvent('openAuthModal', { detail: { defaultTab: 'signin' } })
+          window.dispatchEvent(event)
+        }}
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 btn-coral w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center text-xl md:text-2xl"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        title="Sign in to chat with Mary George"
       >
-        <div className="bg-coral-gradient p-4 rounded-full shadow-lg">
-          <div className="text-white text-center">
-            <div className="text-2xl mb-2">💬</div>
-            <p className="text-sm font-semibold">Sign in to chat with Mary George</p>
-          </div>
-        </div>
-      </motion.div>
+        💬
+      </motion.button>
     )
   }
 
