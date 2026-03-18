@@ -1,8 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import fs from 'fs'
+import path from 'path'
 
-// Store OTPs temporarily (in production, use Redis or database)
-const otpStore = new Map<string, { otp: string; expires: number }>()
+// Store OTPs in a JSON file for persistence
+const OTP_FILE = path.join(process.cwd(), 'data', 'otp-store.json')
+
+// Ensure data directory exists
+function ensureDataDir() {
+  const dataDir = path.dirname(OTP_FILE)
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true })
+  }
+}
+
+// Load OTPs from file
+function loadOTPs(): Map<string, { otp: string; expires: number }> {
+  ensureDataDir()
+  try {
+    if (fs.existsSync(OTP_FILE)) {
+      const data = fs.readFileSync(OTP_FILE, 'utf8')
+      const obj = JSON.parse(data)
+      return new Map(Object.entries(obj))
+    }
+  } catch (error) {
+    console.error('Error loading OTPs:', error)
+  }
+  return new Map()
+}
+
+// Save OTPs to file
+function saveOTPs(otpMap: Map<string, { otp: string; expires: number }>) {
+  ensureDataDir()
+  try {
+    const obj = Object.fromEntries(otpMap)
+    fs.writeFileSync(OTP_FILE, JSON.stringify(obj, null, 2))
+  } catch (error) {
+    console.error('Error saving OTPs:', error)
+  }
+}
 
 // Generate 6-digit OTP
 function generateOTP(): string {
@@ -26,11 +62,17 @@ export async function POST(request: NextRequest) {
     // Generate OTP
     const otp = generateOTP()
     
+    // Load existing OTPs
+    const otpStore = loadOTPs()
+    
     // Store OTP with 10 minute expiration
     otpStore.set(email, {
       otp,
       expires: Date.now() + 10 * 60 * 1000 // 10 minutes
     })
+    
+    // Save to file
+    saveOTPs(otpStore)
 
     // Send OTP via email
     try {
@@ -112,7 +154,9 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'OTP sent to your email. Please check your inbox.'
+        message: 'OTP sent to your email. Please check your inbox.',
+        // Show OTP in development for testing
+        testOTP: process.env.NODE_ENV === 'development' || !process.env.EMAIL_PASS ? otp : undefined
       })
     } catch (emailError) {
       console.error('Email sending failed:', emailError)
@@ -122,8 +166,8 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({
         success: true,
-        message: 'OTP generated. Check server logs for the code (email service not configured).',
-        otp: process.env.NODE_ENV === 'development' ? otp : undefined
+        message: 'OTP generated. Check server logs or browser console for the code.',
+        testOTP: otp // Show OTP if email fails
       })
     }
   } catch (error) {
@@ -149,6 +193,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Load OTPs from file
+    const otpStore = loadOTPs()
+    
     // Check if OTP exists and is valid
     const storedOTP = otpStore.get(email)
     
@@ -161,6 +208,7 @@ export async function PUT(request: NextRequest) {
 
     if (Date.now() > storedOTP.expires) {
       otpStore.delete(email)
+      saveOTPs(otpStore)
       return NextResponse.json(
         { success: false, message: 'OTP has expired. Please request a new one.' },
         { status: 400 }
@@ -201,6 +249,7 @@ export async function PUT(request: NextRequest) {
 
       // Clear the OTP
       otpStore.delete(email)
+      saveOTPs(otpStore)
 
       return NextResponse.json({
         success: true,
