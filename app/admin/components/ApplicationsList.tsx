@@ -128,10 +128,85 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
   }
 
   return (
-    <div className="glass-effect rounded-2xl p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Grant Applications</h2>
+    <div className="glass-effect rounded-2xl p-4 md:p-6">
+      <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Grant Applications</h2>
       
-      <div className="overflow-x-auto">
+      {/* Mobile View - Card Layout */}
+      <div className="block md:hidden space-y-4">
+        {applications.length === 0 ? (
+          <div className="py-12 text-center">
+            <div className="text-gray-400">
+              <div className="text-4xl mb-4">📋</div>
+              <p className="text-lg font-medium">No applications yet</p>
+              <p className="text-sm">Applications will appear here once submitted</p>
+            </div>
+          </div>
+        ) : (
+          applications.map((app, index) => (
+            <motion.div
+              key={app.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              onClick={() => setSelectedApp(app)}
+              className="glass-effect rounded-xl p-4 cursor-pointer hover:bg-white/10 transition-colors"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="text-white font-semibold">{app.fullName}</p>
+                  <p className="text-gray-400 text-sm">{app.email}</p>
+                </div>
+                {getStatusBadge(app.status)}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                <div>
+                  <p className="text-gray-400">Country</p>
+                  <p className="text-white">{app.country}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Grant Amount</p>
+                  <p className="text-coral-400 font-semibold">{app.grantAmount}</p>
+                </div>
+              </div>
+              
+              <div className="text-xs text-gray-400 mb-3">
+                Submitted: {new Date(app.submittedAt).toLocaleDateString()}
+              </div>
+              
+              {app.status === 'pending' && (
+                <div className="flex space-x-2">
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      updateStatus(app.id, 'approved')
+                    }}
+                    className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Approve
+                  </motion.button>
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      updateStatus(app.id, 'rejected')
+                    }}
+                    className="flex-1 px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Reject
+                  </motion.button>
+                </div>
+              )}
+            </motion.div>
+          ))
+        )}
+      </div>
+      
+      {/* Desktop View - Table Layout */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/20">
@@ -161,7 +236,8 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="border-b border-white/10 hover:bg-white/5 transition-colors"
+                  onClick={() => setSelectedApp(app)}
+                  className="border-b border-white/10 hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   <td className="py-4 px-4">
                     <div>
@@ -180,7 +256,10 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                       {app.status === 'pending' && (
                         <>
                           <motion.button
-                            onClick={() => updateStatus(app.id, 'approved')}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              updateStatus(app.id, 'approved')
+                            }}
                             className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded transition-colors"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -188,7 +267,10 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                             Approve
                           </motion.button>
                           <motion.button
-                            onClick={() => updateStatus(app.id, 'rejected')}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              updateStatus(app.id, 'rejected')
+                            }}
                             className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -198,7 +280,10 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                         </>
                       )}
                       <motion.button
-                        onClick={() => setSelectedApp(app)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedApp(app)
+                        }}
                         className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded transition-colors"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -214,7 +299,7 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
         </table>
       </div>
 
-      {/* Application Detail Modal */}
+      {/* Application Detail Modal - Responsive */}
       {selectedApp && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -225,11 +310,11 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="glass-effect rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            className="glass-effect rounded-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-white">Application Details</h3>
+            <div className="flex justify-between items-center mb-4 md:mb-6">
+              <h3 className="text-xl md:text-2xl font-bold text-white">Application Details</h3>
               <button
                 onClick={() => setSelectedApp(null)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -239,7 +324,7 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
             </div>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-400 text-sm">Application ID</label>
                   <p className="text-white font-medium">{selectedApp.id}</p>

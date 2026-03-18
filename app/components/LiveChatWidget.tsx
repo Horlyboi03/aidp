@@ -242,7 +242,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
         )}
       </motion.button>
 
-      {/* Chat Window */}
+      {/* Chat Window - Beautiful White Background */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -250,7 +250,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-24 right-6 z-40 w-96 h-[500px] glass-effect rounded-2xl overflow-hidden flex flex-col"
+            className="fixed bottom-20 md:bottom-24 right-4 md:right-6 z-40 w-[calc(100vw-2rem)] md:w-96 h-[500px] bg-white/98 backdrop-blur-xl rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-gray-200"
           >
             {/* Chat Header */}
             <div className="bg-coral-gradient p-4 text-white flex justify-between items-center">
@@ -269,12 +269,12 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
               </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3">
+            {/* Messages - White Background */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-white">
               {messages.length === 0 && (
-                <div className="text-center text-gray-400 py-8">
+                <div className="text-center text-gray-500 py-8">
                   <div className="text-4xl mb-2">👋</div>
-                  <p>Start a conversation with Mary George!</p>
+                  <p className="font-medium">Start a conversation with Mary George!</p>
                   <p className="text-sm mt-2">She'll respond as soon as possible.</p>
                 </div>
               )}
@@ -287,17 +287,17 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                    className={`max-w-xs px-3 py-2 rounded-lg text-sm shadow-md ${
                       message.sender === 'user'
                         ? 'bg-coral-gradient text-white'
-                        : 'glass-effect text-gray-200 border border-white/20'
+                        : 'bg-white text-gray-800 border border-gray-200'
                     }`}
                   >
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-xs">
+                      <span className={`font-semibold text-xs ${message.sender === 'user' ? 'text-white' : 'text-coral-600'}`}>
                         {message.senderName}
                       </span>
-                      <span className="text-xs opacity-70">
+                      <span className={`text-xs ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
                         {message.timestamp.toLocaleTimeString()}
                       </span>
                     </div>
@@ -307,7 +307,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
                     {message.sender === 'user' && (
                       <div className="flex justify-end mt-1">
                         {message.delivered && (
-                          <span className={`text-xs ${message.read ? 'text-blue-400' : 'text-gray-400'}`}>
+                          <span className={`text-xs ${message.read ? 'text-blue-200' : 'text-white/60'}`}>
                             {message.read ? '✓✓' : '✓'}
                           </span>
                         )}
@@ -319,8 +319,8 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="p-4 border-t border-white/20">
+            {/* Input - White Background */}
+            <div className="p-4 border-t border-gray-200 bg-white">
               <div className="flex space-x-2">
                 <input
                   type="text"
@@ -328,7 +328,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type your message to Mary..."
-                  className="flex-1 form-input px-3 py-2 rounded-lg text-sm"
+                  className="flex-1 px-3 py-2 rounded-lg text-sm border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                 />
                 <motion.button
                   onClick={sendMessage}
@@ -340,7 +340,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
                   Send
                 </motion.button>
               </div>
-              <p className="text-xs text-gray-400 mt-2 text-center">
+              <p className="text-xs text-gray-500 mt-2 text-center">
                 Messages are sent directly to Mary George (marygeorge193@gmail.com)
               </p>
             </div>
