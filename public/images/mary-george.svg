@@ -1,32 +1,79 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8E8E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD5B4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFCBA4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
   <!-- Background -->
-  <rect width="400" height="400" fill="#FF6B6B"/>
+  <rect width="400" height="400" fill="url(#bgGrad)"/>
+  
+  <!-- Professional Woman Illustration -->
+  
+  <!-- Neck -->
+  <rect x="175" y="240" width="50" height="40" fill="url(#skinGrad)" rx="10"/>
   
   <!-- Face -->
-  <circle cx="200" cy="180" r="80" fill="#FFD166"/>
+  <ellipse cx="200" cy="180" rx="85" ry="95" fill="url(#skinGrad)"/>
   
-  <!-- Hair -->
-  <path d="M120,120 Q200,80 280,120 Q260,60 200,40 Q140,60 120,120Z" fill="#8B4513"/>
+  <!-- Hair (Professional Bob Cut) -->
+  <ellipse cx="200" cy="140" rx="95" ry="80" fill="#4A2511"/>
+  <rect x="105" y="140" width="190" height="100" fill="#4A2511"/>
+  <ellipse cx="200" cy="240" rx="95" ry="40" fill="#4A2511"/>
+  
+  <!-- Face overlay to cover hair -->
+  <ellipse cx="200" cy="180" rx="80" ry="90" fill="url(#skinGrad)"/>
+  
+  <!-- Ears -->
+  <ellipse cx="120" cy="180" rx="15" ry="20" fill="#FFCBA4"/>
+  <ellipse cx="280" cy="180" rx="15" ry="20" fill="#FFCBA4"/>
   
   <!-- Eyes -->
-  <circle cx="170" cy="170" r="12" fill="#333"/>
-  <circle cx="230" cy="170" r="12" fill="#333"/>
+  <ellipse cx="170" cy="170" rx="15" ry="18" fill="white"/>
+  <ellipse cx="230" cy="170" rx="15" ry="18" fill="white"/>
+  <circle cx="172" cy="172" r="10" fill="#4A2511"/>
+  <circle cx="232" cy="172" r="10" fill="#4A2511"/>
+  <circle cx="174" cy="170" r="4" fill="white"/>
+  <circle cx="234" cy="170" r="4" fill="white"/>
+  
+  <!-- Eyebrows -->
+  <path d="M155,155 Q170,150 185,155" stroke="#4A2511" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M215,155 Q230,150 245,155" stroke="#4A2511" stroke-width="4" fill="none" stroke-linecap="round"/>
+  
+  <!-- Nose -->
+  <path d="M200,185 L195,205 L205,205" stroke="#FFCBA4" stroke-width="2" fill="none"/>
   
   <!-- Smile -->
-  <path d="M160,220 Q200,250 240,220" stroke="#333" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M170,215 Q200,235 230,215" stroke="#C44569" stroke-width="5" fill="none" stroke-linecap="round"/>
   
   <!-- Professional Blazer -->
-  <rect x="120" y="260" width="160" height="80" fill="#2C3E50" rx="10"/>
-  <rect x="140" y="260" width="120" height="40" fill="#34495E" rx="5"/>
+  <path d="M120,280 L120,400 L280,400 L280,280 Q250,260 200,260 Q150,260 120,280Z" fill="#2C3E50"/>
+  
+  <!-- Shirt/Blouse -->
+  <path d="M150,280 L150,320 L250,320 L250,280 Q225,270 200,270 Q175,270 150,280Z" fill="white"/>
+  
+  <!-- Blazer Lapels -->
+  <path d="M120,280 L160,320 L160,280 Z" fill="#34495E"/>
+  <path d="M280,280 L240,320 L240,280 Z" fill="#34495E"/>
+  
+  <!-- Necklace/Professional Detail -->
+  <circle cx="200" cy="265" r="8" fill="#FFD700" stroke="#FFA500" stroke-width="2"/>
+  
+  <!-- Name Badge/Text Background -->
+  <rect x="50" y="340" width="300" height="50" fill="rgba(255,255,255,0.2)" rx="10"/>
   
   <!-- Name Text -->
-  <text x="200" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold">
+  <text x="200" y="370" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="white" font-weight="bold">
     Mary George
   </text>
   
   <!-- Title Text -->
-  <text x="200" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#FFD166">
-    Program Director
+  <text x="200" y="395" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#FFE5B4" font-weight="600">
+    Program Director - AIDP
   </text>
 </svg>
