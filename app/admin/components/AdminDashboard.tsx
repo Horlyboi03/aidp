@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import ApplicationsList from './ApplicationsList'
 import MessagingPanel from './MessagingPanel'
 import AgentImageUpload from './AgentImageUpload'
+import ChangePassword from './ChangePassword'
 
 interface AdminDashboardProps {
   onLogout: () => void
@@ -412,6 +413,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           {activeTab === 'messages' && <MessagingPanel onUnreadCountChange={handleUnreadCountChange} />}
           {activeTab === 'settings' && (
             <div className="space-y-6">
+              <ChangePassword />
+              
               <AgentImageUpload />
               
               <motion.div
