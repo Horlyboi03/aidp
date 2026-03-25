@@ -242,6 +242,12 @@ export async function saveConversation(conversation: any) {
     await initializeTables()
     
     console.log('saveConversation: Saving conversation:', conversation.id)
+    
+    const lastMessage = conversation.lastMessage || null
+    const lastMessageAt = conversation.lastMessageAt || null
+    const unreadCount = conversation.unreadCount || 0
+    const createdAt = conversation.createdAt || new Date().toISOString()
+    
     await sql`
       INSERT INTO conversations (
         id, applicantName, applicantEmail, lastMessage, lastMessageAt, unreadCount, createdAt
@@ -249,15 +255,15 @@ export async function saveConversation(conversation: any) {
         ${conversation.id},
         ${conversation.applicantName},
         ${conversation.applicantEmail},
-        ${conversation.lastMessage || null},
-        ${conversation.lastMessageAt || null},
-        ${conversation.unreadCount || 0},
-        ${conversation.createdAt || new Date().toISOString()}
+        ${lastMessage},
+        ${lastMessageAt},
+        ${unreadCount},
+        ${createdAt}
       )
       ON CONFLICT (id) DO UPDATE SET
-        lastMessage = ${conversation.lastMessage || null},
-        lastMessageAt = ${conversation.lastMessageAt || null},
-        unreadCount = ${conversation.unreadCount || 0}
+        lastMessage = EXCLUDED.lastMessage,
+        lastMessageAt = EXCLUDED.lastMessageAt,
+        unreadCount = EXCLUDED.unreadCount
     `
     console.log('saveConversation: Conversation saved successfully')
 
