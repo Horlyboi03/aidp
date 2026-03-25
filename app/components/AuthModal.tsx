@@ -27,10 +27,12 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
   const [isSignUp, setIsSignUp] = useState(true)
+  const [isForgotPassword, setIsForgotPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const signUpForm = useForm<SignUpData>()
   const signInForm = useForm<SignInData>()
+  const forgotPasswordForm = useForm<{ email: string }>()
 
   const onSignUp = async (data: SignUpData) => {
     if (data.password !== data.confirmPassword) {
@@ -94,6 +96,31 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     }
   }
 
+  const onForgotPassword = async (data: { email: string }) => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('Password reset instructions sent to your email!')
+        setIsForgotPassword(false)
+        forgotPasswordForm.reset()
+      } else {
+        toast.error(result.message || 'Failed to send reset email')
+      }
+    } catch (error) {
+      toast.error('Failed to send reset email')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -113,7 +140,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {isSignUp ? 'Create Account' : 'Sign In'}
+                {isForgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Sign In'}
               </h2>
               <button
                 onClick={onClose}
@@ -123,7 +150,47 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
               </button>
             </div>
 
-            {isSignUp ? (
+            {isForgotPassword ? (
+              <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)} className="space-y-4">
+                <p className="text-gray-700 mb-4">
+                  Enter your email address and we'll send you instructions to reset your password.
+                </p>
+                
+                <div>
+                  <label className="block text-gray-900 font-semibold mb-2">Email *</label>
+                  <input
+                    {...forgotPasswordForm.register('email', { 
+                      required: 'Email is required',
+                      pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' }
+                    })}
+                    type="email"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
+                    placeholder="Enter your email"
+                  />
+                  {forgotPasswordForm.formState.errors.email && (
+                    <p className="text-red-400 text-sm mt-1">{forgotPasswordForm.formState.errors.email.message}</p>
+                  )}
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-coral w-full py-3 rounded-xl text-white font-semibold"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {loading ? 'Sending...' : 'Send Reset Instructions'}
+                </motion.button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(false)}
+                  className="w-full text-coral-600 hover:text-coral-700 font-semibold"
+                >
+                  ← Back to Sign In
+                </button>
+              </form>
+            ) : isSignUp ? (
               <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
                 <div>
                   <label className="block text-gray-900 font-semibold mb-2">Full Name *</label>
@@ -247,6 +314,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                   )}
                 </div>
 
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-coral-600 hover:text-coral-700 text-sm font-semibold"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+
                 <motion.button
                   type="submit"
                   disabled={loading}
@@ -259,17 +336,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
               </form>
             )}
 
-            <div className="mt-6 text-center">
-              <p className="text-gray-700">
-                {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-                <button
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-coral-600 hover:text-coral-700 ml-2 font-semibold"
-                >
-                  {isSignUp ? 'Sign In' : 'Sign Up'}
-                </button>
-              </p>
-            </div>
+            {!isForgotPassword && (
+              <div className="mt-6 text-center">
+                <p className="text-gray-700">
+                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                  <button
+                    onClick={() => setIsSignUp(!isSignUp)}
+                    className="text-coral-600 hover:text-coral-700 ml-2 font-semibold"
+                  >
+                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                  </button>
+                </p>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

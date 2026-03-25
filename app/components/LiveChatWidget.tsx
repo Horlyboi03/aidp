@@ -44,6 +44,12 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
 
   // Debug logging
   useEffect(() => {
+    console.log('=== LiveChatWidget Mount/Update ===')
+    console.log('user prop:', user)
+    console.log('guestInfo prop:', guestInfo)
+    console.log('chatUser (computed):', chatUser)
+    console.log('conversationId:', conversationId)
+    
     if (chatUser) {
       console.log('LiveChatWidget: User loaded', {
         id: chatUser.id,
@@ -55,7 +61,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
     } else {
       console.log('LiveChatWidget: No user or guest info')
     }
-  }, [chatUser, conversationId, guestInfo])
+  }, [chatUser, conversationId, guestInfo, user])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -150,6 +156,13 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
   }
 
   const sendMessage = async () => {
+    console.log('=== SEND MESSAGE DEBUG ===')
+    console.log('inputText:', inputText)
+    console.log('chatUser:', chatUser)
+    console.log('conversationId:', conversationId)
+    console.log('user prop:', user)
+    console.log('guestInfo prop:', guestInfo)
+    
     if (!inputText.trim() || !chatUser || !conversationId) {
       console.error('Cannot send message:', { 
         hasInput: !!inputText.trim(), 
@@ -159,6 +172,8 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       })
       if (!conversationId) {
         toast.error('Unable to start conversation. Please refresh the page.')
+      } else if (!chatUser) {
+        toast.error('Please sign in or submit an application first to chat.')
       }
       return
     }
@@ -166,6 +181,8 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
     // Validate chatUser has required fields
     if (!chatUser.fullName || !chatUser.email) {
       console.error('User object missing required fields:', chatUser)
+      console.error('chatUser.fullName:', chatUser.fullName)
+      console.error('chatUser.email:', chatUser.email)
       toast.error('User information incomplete. Please sign in again.')
       return
     }
