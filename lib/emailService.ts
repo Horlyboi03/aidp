@@ -147,3 +147,71 @@ export function getRejectionEmailTemplate(applicantName: string): string {
     </html>
   `
 }
+
+export function getWelcomeEmailTemplate(applicantName: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; background: #FF6B6B; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>👋 Welcome to AIDP!</h1>
+          <p>Your Account Has Been Created Successfully</p>
+        </div>
+        <div class="content">
+          <p>Dear ${applicantName},</p>
+          
+          <p>Thank you for creating an account with the <strong>AIDP Grant Program</strong>!</p>
+          
+          <p>Your account has been successfully created and you can now:</p>
+          <ul>
+            <li>Apply for grants ranging from $100,000 to $450,000</li>
+            <li>Track your application status in real-time</li>
+            <li>Communicate directly with our Program Director, Mary George</li>
+            <li>Receive instant notifications about your application</li>
+          </ul>
+          
+          <h3>Next Steps:</h3>
+          <ol>
+            <li>Log in to your dashboard</li>
+            <li>Complete your grant application</li>
+            <li>Submit required documents</li>
+            <li>Wait for review (typically less than 24 hours)</li>
+          </ol>
+          
+          <p><strong>Important Information:</strong></p>
+          <ul>
+            <li>Grant amounts: $100K, $150K, $200K, $250K, $300K, $350K, $400K, $450K</li>
+            <li>Review time: Less than 24 hours</li>
+            <li>No repayment required - this is your right as a taxpayer</li>
+            <li>Grant money is not taxable and bears no interest</li>
+          </ul>
+          
+          <p>If you have any questions, please contact our Program Director:</p>
+          <p><strong>Mary George</strong><br>
+          Email: maryygeorge193@gmail.com</p>
+          
+          <p>We look forward to helping you achieve your goals!</p>
+          
+          <p>Best regards,<br>
+          <strong>AIDP Grant Program Team</strong></p>
+        </div>
+        <div class="footer">
+          <p>This is an automated email from the AIDP Grant Program. Please do not reply to this email.</p>
+          <p>&copy; ${new Date().getFullYear()} AIDP Grant Program. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}

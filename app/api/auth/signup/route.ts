@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveUser, getUserByEmail } from '../../../../lib/postgres-database'
+import { sendEmail, getWelcomeEmailTemplate } from '../../../../lib/emailService'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
@@ -56,6 +57,19 @@ export async function POST(request: NextRequest) {
     }
 
     await saveUser(user)
+
+    // Send welcome email
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'Welcome to AIDP Grant Program! 🎉',
+        html: getWelcomeEmailTemplate(fullName)
+      })
+      console.log('Welcome email sent to:', email)
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError)
+      // Don't fail the signup if email fails
+    }
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = user
