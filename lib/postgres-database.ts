@@ -181,8 +181,17 @@ export async function getUserByEmail(email: string) {
     await initializeTables()
     const { rows } = await sql`SELECT * FROM users WHERE email = ${email}`
     const user = rows[0]
-    if (user && user.applications) {
-      user.applications = JSON.parse(user.applications)
+    if (user) {
+      // Map lowercase postgres fields to camelCase
+      if (user.fullname && !user.fullName) {
+        user.fullName = user.fullname
+      }
+      if (user.createdat && !user.createdAt) {
+        user.createdAt = user.createdat
+      }
+      if (user.applications) {
+        user.applications = JSON.parse(user.applications)
+      }
     }
     return user
   } catch (error) {
@@ -195,8 +204,17 @@ export async function getUserById(id: string) {
   await initializeTables()
   const { rows } = await sql`SELECT * FROM users WHERE id = ${id}`
   const user = rows[0]
-  if (user && user.applications) {
-    user.applications = JSON.parse(user.applications)
+  if (user) {
+    // Map lowercase postgres fields to camelCase
+    if (user.fullname && !user.fullName) {
+      user.fullName = user.fullname
+    }
+    if (user.createdat && !user.createdAt) {
+      user.createdAt = user.createdat
+    }
+    if (user.applications) {
+      user.applications = JSON.parse(user.applications)
+    }
   }
   return user
 }

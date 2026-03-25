@@ -99,7 +99,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       if (response.ok) {
         const data = await response.json()
         if (data.conversation && data.conversation.messages) {
-          const senderName = chatUser.fullName || chatUser.name || (chatUser as any).full_name || 'User'
+          const senderName = chatUser.fullName || (chatUser as any).fullname || chatUser.name || (chatUser as any).full_name || 'User'
           const formattedMessages = data.conversation.messages.map((msg: any) => ({
             id: msg.id,
             text: msg.message,
@@ -179,8 +179,8 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       return
     }
 
-    // Get fullName and email with fallbacks
-    const senderName = chatUser.fullName || chatUser.name || (chatUser as any).full_name || 'User'
+    // Get fullName and email with fallbacks - check both camelCase and lowercase
+    const senderName = chatUser.fullName || (chatUser as any).fullname || chatUser.name || (chatUser as any).full_name || 'User'
     const senderEmail = chatUser.email || (chatUser as any).user_email || ''
     
     console.log('Extracted sender info:', { senderName, senderEmail })
