@@ -158,11 +158,14 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
         console.log('Message sent successfully')
         toast.success('Message sent to Mary George!')
       } else {
-        throw new Error('Failed to send message')
+        const errorData = await response.json()
+        console.error('Server error:', errorData)
+        throw new Error(errorData.message || errorData.error || 'Failed to send message')
       }
     } catch (error) {
       console.error('Failed to send message:', error)
-      toast.error('Failed to send message. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.'
+      toast.error(errorMessage)
       // Remove the message from UI if sending failed
       setMessages(prev => prev.filter(msg => msg.id !== userMessage.id))
     }
