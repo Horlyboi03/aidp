@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres'
 // Initialize tables if they don't exist
 export async function initializeTables() {
   try {
+    console.log('Starting table initialization...')
+    
     // Applications table
     await sql`
       CREATE TABLE IF NOT EXISTS applications (
@@ -23,6 +25,7 @@ export async function initializeTables() {
         updatedAt TEXT
       )
     `
+    console.log('Applications table ready')
 
     // Users table
     await sql`
@@ -37,6 +40,7 @@ export async function initializeTables() {
         createdAt TEXT NOT NULL
       )
     `
+    console.log('Users table ready')
 
     // Conversations table
     await sql`
@@ -50,6 +54,7 @@ export async function initializeTables() {
         createdAt TEXT NOT NULL
       )
     `
+    console.log('Conversations table ready')
 
     // Messages table
     await sql`
@@ -64,10 +69,16 @@ export async function initializeTables() {
         timestamp TEXT NOT NULL
       )
     `
+    console.log('Messages table ready')
 
-    console.log('Postgres tables initialized')
+    console.log('All Postgres tables initialized successfully')
+    return true
   } catch (error) {
     console.error('Error initializing tables:', error)
+    if (error instanceof Error) {
+      console.error('Error details:', error.message, error.stack)
+    }
+    throw error
   }
 }
 
