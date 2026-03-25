@@ -17,6 +17,7 @@ function ResetPasswordContent() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [tokenFromUrl, setTokenFromUrl] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm<ResetPasswordData>()
 
@@ -52,10 +53,10 @@ function ResetPasswordContent() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Password reset successfully! Redirecting to home...')
+        setShowSuccess(true)
         setTimeout(() => {
           router.push('/')
-        }, 2000)
+        }, 3000)
       } else {
         toast.error(result.message || 'Failed to reset password')
       }
@@ -64,6 +65,51 @@ function ResetPasswordContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="text-8xl mb-6"
+          >
+            ✅
+          </motion.div>
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-5xl font-bold text-white mb-4"
+          >
+            Password Changed Successfully!
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-2xl text-gray-300 mb-8"
+          >
+            You can now sign in with your new password
+          </motion.p>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-gray-400"
+          >
+            Redirecting to home page...
+          </motion.div>
+        </motion.div>
+      </div>
+    )
   }
 
   return (
