@@ -355,9 +355,13 @@ export async function getMessagesByConversationId(conversationId: string) {
     const { rows } = await sql`SELECT * FROM messages WHERE conversationId = ${conversationId} ORDER BY timestamp ASC`
     // Map lowercase postgres fields to camelCase
     return rows.map(msg => ({
-      ...msg,
+      id: msg.id,
       conversationId: msg.conversationid || msg.conversationId,
-      isAdmin: msg.isadmin !== undefined ? msg.isadmin : msg.isAdmin,
+      sender: msg.sender,
+      message: msg.message,
+      isAdmin: msg.isadmin !== undefined ? Boolean(msg.isadmin) : Boolean(msg.isAdmin),
+      delivered: msg.delivered !== undefined ? Boolean(msg.delivered) : true,
+      read: msg.read !== undefined ? Boolean(msg.read) : false,
       timestamp: msg.timestamp
     }))
   } catch (error) {
