@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { userStore } from '../../../../lib/userStore'
-import { dataStore } from '../../../../lib/dataStore'
+import { getUserById, getUserApplications, getApplicationById } from '../../../../lib/database'
 import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
@@ -14,7 +13,7 @@ function getUserFromToken(request: NextRequest) {
 
     const token = authHeader.substring(7)
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string, email: string }
-    return userStore.getUserById(decoded.userId)
+    return getUserById(decoded.userId)
   } catch (error) {
     return null
   }
@@ -32,10 +31,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's applications
-    const userApplicationIds = userStore.getUserApplications(user.id)
+    const userApplicationIds = getUserApplications(user.id)
     const applications = userApplicationIds
-      .map(id => dataStore.getApplicationById(id))
-      .filter(app => app !== undefined)
+      .map((id: string) => getApplicationById(id))
+      .filter((app: any) => app !== undefined)
 
     return NextResponse.json({
       success: true,

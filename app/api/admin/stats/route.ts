@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { dataStore } from '../../../../lib/dataStore'
+import { getAllApplications, getApplicationStats } from '../../../../lib/database'
 
 export async function GET() {
   try {
-    const realStats = dataStore.getStats()
+    const realStats = getApplicationStats()
     
     // Calculate additional metrics
-    const applications = dataStore.getApplications()
+    const applications = getAllApplications() as any[]
     const today = new Date().toDateString()
     const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     
@@ -18,7 +18,7 @@ export async function GET() {
       new Date(app.submittedAt) >= thisWeek
     ).length
     
-    // Calculate total grants awarded (mock calculation)
+    // Calculate total grants awarded
     const approvedApplications = applications.filter(app => app.status === 'approved')
     const totalGrantsAwarded = approvedApplications.reduce((total, app) => {
       const amount = parseInt(app.grantAmount.replace(/[$,]/g, ''))
@@ -33,8 +33,8 @@ export async function GET() {
       ...realStats,
       todayApplications,
       thisWeekApplications,
-      totalGrantsAwarded: `$${totalGrantsAwarded.toLocaleString()}`,
-      averageGrantAmount: `$${averageGrantAmount.toLocaleString()}`
+      totalGrantsAwarded: `${totalGrantsAwarded.toLocaleString()}`,
+      averageGrantAmount: `${averageGrantAmount.toLocaleString()}`
     }
     
     return NextResponse.json({ stats })

@@ -1,82 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-
-export interface Message {
-  id: string
-  conversationId: string
-  sender: string
-  message: string
-  timestamp: string
-  isAdmin: boolean
-  read: boolean
-  delivered: boolean
-}
-
-export interface Conversation {
-  id: string
-  applicantName: string
-  applicantEmail: string
-  lastMessage: string
-  unreadCount: number
-  messages: Message[]
-  createdAt: string
-}
-
-// File-based storage for demo purposes
-const dataFile = path.join(process.cwd(), 'data', 'conversations.json')
-
-function loadConversations(): Conversation[] {
-  try {
-    // Ensure data directory exists
-    const dataDir = path.dirname(dataFile)
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
-    }
-
-    // Load existing data
-    if (fs.existsSync(dataFile)) {
-      const data = fs.readFileSync(dataFile, 'utf8')
-      return JSON.parse(data)
-    }
-    return []
-  } catch (error) {
-    console.error('Error loading conversations:', error)
-    return []
-  }
-}
-
-function saveConversations(conversations: Conversation[]): void {
-  try {
-    fs.writeFileSync(dataFile, JSON.stringify(conversations, null, 2))
-    console.log('Saved', conversations.length, 'conversations to file')
-  } catch (error) {
-    console.error('Error saving conversations:', error)
-  }
-}
+import { 
+  saveConversation, 
+  getAllConversations, 
+  getConversationById,
+  saveMessage, 
+  getMessagesByConversationId,
+  markMessagesAsRead 
+} from '../../../lib/database'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const conversationId = searchParams.get('conversationId')
   
-  const conversations = loadConversations()
-  
   if (conversationId) {
-    // Get specific conversation
-    const conversation = conversations.find(c => c.id === conversationId)
-    return NextResponse.json({ conversation })
+    // Get specific conversation with messages
+    const conversation = getConversationById(conversationId) as any
+    if (conversation) {
+      const messages = getMessagesByConversationId(conversationId)
+      return NextResponse.json({ 
+        conversation: {
+          ...conversation,
+          messages
+        }
+      })
+    }
+    return NextResponse.json({ conversation: null })
   }
   
-  // Get all conversations
-  return NextResponse.json({ conversations })
+  // Get all conversations with their messages
+  const conversations = getAllConversations() as any[]
+  const conversationsWithMessages = conversations.map(conv => ({
+    ...conv,
+    messages: getMessagesByConversationId(conv.id)
+  }))
+  
+  return NextResponse.json({ conversations: conversationsWithMessages })
 }
 
 export async function POST(request: NextRequest) {
   try {
     const { conversationId, sender, message, isAdmin, applicantName, applicantEmail } = await request.json()
     
-    let conversations = loadConversations()
-    let conversation = conversations.find(c => c.id === conversationId)
+    let conversation = getConversationById(conversationId) as any
     
     if (!conversation) {
       // Create new conversation
@@ -85,15 +50,23 @@ export async function POST(request: NextRequest) {
         applicantName: applicantName || sender,
         applicantEmail: applicantEmail || '',
         lastMessage: message,
+        lastMessageAt: new Date().toISOString(),
         unreadCount: isAdmin ? 0 : 1,
-        messages: [],
         createdAt: new Date().toISOString()
       }
-      conversations.push(conversation)
+      saveConversation(conversation)
+    } else {
+      // Update existing conversation
+      conversation.lastMessage = message
+      conversation.lastMessageAt = new Date().toISOString()
+      if (!isAdmin) {
+        conversation.unreadCount = (conversation.unreadCount || 0) + 1
+      }
+      saveConversation(conversation)
     }
     
     // Add new message
-    const newMessage: Message = {
+    const newMessage = {
       id: `msg-${Date.now()}`,
       conversationId,
       sender,
@@ -101,29 +74,24 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       isAdmin,
       read: false,
-      delivered: true // Messages are delivered immediately when sent
+      delivered: true
     }
     
-    conversation.messages.push(newMessage)
-    conversation.lastMessage = message
+    saveMessage(newMessage)
     
-    // Update unread count
-    if (isAdmin) {
-      // Admin sent message, reset unread count for admin
-      conversation.unreadCount = 0
-    } else {
-      // User sent message, increment unread count for admin
-      conversation.unreadCount = conversation.messages.filter(m => !m.isAdmin && !m.read).length
-    }
-    
-    saveConversations(conversations)
+    // Get all messages for this conversation
+    const messages = getMessagesByConversationId(conversationId)
     
     return NextResponse.json({ 
       success: true, 
       message: 'Message sent successfully',
-      conversation 
+      conversation: {
+        ...conversation,
+        messages
+      }
     })
   } catch (error) {
+    console.error('Message send error:', error)
     return NextResponse.json(
       { success: false, message: 'Failed to send message' },
       { status: 500 }
@@ -135,34 +103,25 @@ export async function PUT(request: NextRequest) {
   try {
     const { conversationId, markAsRead, markAdminMessagesAsRead } = await request.json()
     
-    let conversations = loadConversations()
-    const conversation = conversations.find(c => c.id === conversationId)
+    const conversation = getConversationById(conversationId) as any
     
     if (conversation) {
       if (markAsRead) {
         // Mark all user messages as read (admin reading user messages)
-        conversation.messages.forEach(m => {
-          if (!m.isAdmin) {
-            m.read = true
-          }
-        })
+        markMessagesAsRead(conversationId, false)
         conversation.unreadCount = 0
+        saveConversation(conversation)
       }
       
       if (markAdminMessagesAsRead) {
         // Mark all admin messages as read (user reading admin messages)
-        conversation.messages.forEach(m => {
-          if (m.isAdmin) {
-            m.read = true
-          }
-        })
+        markMessagesAsRead(conversationId, true)
       }
-      
-      saveConversations(conversations)
     }
     
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error('Update conversation error:', error)
     return NextResponse.json(
       { success: false, message: 'Failed to update conversation' },
       { status: 500 }

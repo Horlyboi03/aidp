@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { userStore } from '../../../../lib/userStore'
+import { saveUser, getUserByEmail } from '../../../../lib/database'
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,21 +31,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user
-    const user = await userStore.createUser({
-      fullName,
-      email,
-      phone,
-      country,
-      password
-    })
-
-    if (!user) {
+    // Check if user already exists
+    const existingUser = getUserByEmail(email)
+    if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User already exists with this email' },
         { status: 409 }
       )
     }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create user
+    const user = {
+      id: `USER-${Date.now()}`,
+      fullName,
+      email,
+      phone,
+      country,
+      password: hashedPassword,
+      applications: '[]',
+      createdAt: new Date().toISOString()
+    }
+
+    saveUser(user)
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = user

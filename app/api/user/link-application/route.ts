@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { userStore } from '../../../../lib/userStore'
+import { getUserById, addApplicationToUser } from '../../../../lib/database'
 import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
@@ -13,7 +13,7 @@ function getUserFromToken(request: NextRequest) {
 
     const token = authHeader.substring(7)
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string, email: string }
-    return userStore.getUserById(decoded.userId)
+    return getUserById(decoded.userId)
   } catch (error) {
     return null
   }
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Link application to user
-    const success = userStore.addApplicationToUser(user.id, applicationId)
+    const success = addApplicationToUser(user.id, applicationId)
 
     if (success) {
       return NextResponse.json({

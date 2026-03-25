@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { userStore } from '../../../../lib/userStore'
+import { getUserByEmail } from '../../../../lib/database'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 
@@ -16,10 +17,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Authenticate user
-    const user = await userStore.authenticateUser(email, password)
+    // Get user from database
+    const user = getUserByEmail(email) as any
 
     if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid email or password' },
+        { status: 401 }
+      )
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password)
+
+    if (!isValidPassword) {
       return NextResponse.json(
         { success: false, message: 'Invalid email or password' },
         { status: 401 }

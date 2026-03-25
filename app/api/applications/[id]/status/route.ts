@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dataStore } from '../../../../../lib/dataStore'
+import { getApplicationById, updateApplicationStatus } from '../../../../../lib/database'
 import { sendEmail, getApprovalEmailTemplate, getRejectionEmailTemplate } from '../../../../../lib/emailService'
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { id } = params
   
-  const application = dataStore.getApplicationById(id)
+  const application = getApplicationById(id) as any
   const status = application?.status || 'pending'
   
   return NextResponse.json({ status })
@@ -29,17 +29,16 @@ export async function PUT(
       )
     }
     
-    const updated = dataStore.updateApplicationStatus(id, status)
+    const application = updateApplicationStatus(id, status) as any
     
-    if (!updated) {
+    if (!application) {
       return NextResponse.json(
         { success: false, message: 'Application not found' },
         { status: 404 }
       )
     }
     
-    // Get the application to send notification
-    const application = dataStore.getApplicationById(id)
+    // Send notification if status is approved or rejected
     if (application && (status === 'approved' || status === 'rejected')) {
       try {
         // Send in-app notification
@@ -77,12 +76,6 @@ export async function PUT(
         console.error('Failed to create status notification:', error)
       }
     }
-    
-    // Email notification sent successfully
-    // In production, you would also:
-    // 1. Log the status change to audit trail
-    // 2. Send SMS notification (optional)
-    // 3. Update external systems if needed
     
     return NextResponse.json({ 
       success: true, 

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dataStore, Application } from '../../../lib/dataStore'
+import { saveApplication, getAllApplications, getApplicationStats } from '../../../lib/database'
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
     console.log('Received application data:', data)
     
-    const application: Application = {
+    const application = {
       id: `APP-${Date.now()}`,
       ...data,
       status: 'pending',
@@ -14,8 +14,8 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('Creating application:', application)
-    dataStore.addApplication(application)
-    console.log('Application added to dataStore')
+    saveApplication(application)
+    console.log('Application saved to database')
     
     // Create submission notification
     try {
@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const applications = dataStore.getApplications()
-    const stats = dataStore.getStats()
+    const applications = getAllApplications()
+    const stats = getApplicationStats()
     
     console.log('GET applications - count:', applications.length)
     console.log('Applications:', applications)
