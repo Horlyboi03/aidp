@@ -247,14 +247,16 @@ export async function saveConversation(conversation: any) {
     const lastMessageAt = conversation.lastMessageAt || null
     const unreadCount = conversation.unreadCount || 0
     const createdAt = conversation.createdAt || new Date().toISOString()
+    const applicantName = conversation.applicantName || conversation.applicantname || 'Unknown'
+    const applicantEmail = conversation.applicantEmail || conversation.applicantemail || ''
     
     await sql`
       INSERT INTO conversations (
         id, applicantName, applicantEmail, lastMessage, lastMessageAt, unreadCount, createdAt
       ) VALUES (
         ${conversation.id},
-        ${conversation.applicantName},
-        ${conversation.applicantEmail},
+        ${applicantName},
+        ${applicantEmail},
         ${lastMessage},
         ${lastMessageAt},
         ${unreadCount},
@@ -278,7 +280,16 @@ export async function getAllConversations() {
   try {
     await initializeTables()
     const { rows } = await sql`SELECT * FROM conversations ORDER BY lastMessageAt DESC NULLS LAST`
-    return rows
+    // Map lowercase postgres fields to camelCase
+    return rows.map(conv => ({
+      ...conv,
+      applicantName: conv.applicantname || conv.applicantName,
+      applicantEmail: conv.applicantemail || conv.applicantEmail,
+      lastMessageAt: conv.lastmessageat || conv.lastMessageAt,
+      lastMessage: conv.lastmessage || conv.lastMessage,
+      unreadCount: conv.unreadcount || conv.unreadCount || 0,
+      createdAt: conv.createdat || conv.createdAt
+    }))
   } catch (error) {
     console.error('Error getting all conversations:', error)
     throw error
@@ -289,7 +300,20 @@ export async function getConversationById(id: string) {
   try {
     await initializeTables()
     const { rows } = await sql`SELECT * FROM conversations WHERE id = ${id}`
-    return rows[0]
+    const conv = rows[0]
+    if (conv) {
+      // Map lowercase postgres fields to camelCase
+      return {
+        ...conv,
+        applicantName: conv.applicantname || conv.applicantName,
+        applicantEmail: conv.applicantemail || conv.applicantEmail,
+        lastMessageAt: conv.lastmessageat || conv.lastMessageAt,
+        lastMessage: conv.lastmessage || conv.lastMessage,
+        unreadCount: conv.unreadcount || conv.unreadCount || 0,
+        createdAt: conv.createdat || conv.createdAt
+      }
+    }
+    return conv
   } catch (error) {
     console.error('Error getting conversation by ID:', error)
     throw error
