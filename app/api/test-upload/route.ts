@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   try {
     // Test uploading a default image
-    const defaultImageUrl = "/images/mary-george.svg"
+    const defaultImageUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
     
     const uploadResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/agent/image`, {
       method: 'POST',

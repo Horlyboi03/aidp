@@ -237,7 +237,12 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
         toast.success('Message sent to Mary George!')
       } else {
         console.error('Server error:', responseData)
-        throw new Error(responseData.message || responseData.error || 'Failed to send message')
+        const errorMsg = responseData.error || responseData.message || 'Failed to send message'
+        console.error('Error message:', errorMsg)
+        if (responseData.details) {
+          console.error('Error details:', responseData.details)
+        }
+        throw new Error(errorMsg)
       }
     } catch (error) {
       console.error('Failed to send message:', error)

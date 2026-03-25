@@ -29,7 +29,7 @@ export default function SimpleAdminPage() {
   }, [])
 
   const setDefaultImage = async () => {
-    const defaultUrl = "/images/mary-george.svg"
+    const defaultUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
     
     try {
       const response = await fetch('/api/agent/image', {

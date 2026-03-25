@@ -8,7 +8,7 @@ export async function GET() {
     console.log('GET /api/agent/image - Stored image:', storedImage ? 'Yes' : 'No')
     
     // If no image is set, return the default
-    const defaultImage = "/images/mary-george.svg"
+    const defaultImage = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
     
     return NextResponse.json({ 
       imageUrl: storedImage || defaultImage,
@@ -18,7 +18,7 @@ export async function GET() {
     console.error('GET /api/agent/image - Error:', error)
     // Fallback to default image on error
     return NextResponse.json({ 
-      imageUrl: "/images/mary-george.svg",
+      imageUrl: "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg",
       success: false,
       message: 'Error loading agent image'
     })

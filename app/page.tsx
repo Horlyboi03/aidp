@@ -23,7 +23,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
-  const [agentImage, setAgentImage] = useState<string>("/images/mary-george.svg")
+  const [agentImage, setAgentImage] = useState<string>("/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg")
   const [guestInfo, setGuestInfo] = useState<{ fullName: string; email: string; applicationId?: string } | null>(null)
 
   // Load user from localStorage on mount
@@ -37,7 +37,7 @@ export default function Home() {
     }
 
     // Load agent image - always start with default
-    const defaultImage = "/images/mary-george.svg"
+    const defaultImage = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
     setAgentImage(defaultImage)
     
     // Then check for custom image
@@ -126,7 +126,7 @@ export default function Home() {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           console.error('Welcome bar image failed to load')
-                          e.currentTarget.src = "/images/mary-george.svg"
+                          e.currentTarget.src = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
                         }}
                       />
                     </div>

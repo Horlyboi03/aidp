@@ -220,7 +220,7 @@ export default function AgentImageUpload() {
                 </p>
                 <button
                   onClick={async () => {
-                    const defaultImageUrl = "/images/mary-george.svg"
+                    const defaultImageUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
                     setUploading(true)
                     try {
                       const response = await fetch('/api/agent/image', {

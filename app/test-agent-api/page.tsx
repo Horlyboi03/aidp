@@ -34,7 +34,7 @@ export default function TestAgentAPI() {
 
   const testUpload = async () => {
     try {
-      const testImageUrl = "/images/mary-george.svg"
+      const testImageUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
       
       const response = await fetch('/api/agent/image', {
         method: 'POST',

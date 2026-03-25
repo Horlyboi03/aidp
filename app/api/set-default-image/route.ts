@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const defaultImageUrl = "/images/mary-george.svg"
+    const defaultImageUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
     
     // Set the default image
     const response = await fetch(`http://localhost:3000/api/agent/image`, {

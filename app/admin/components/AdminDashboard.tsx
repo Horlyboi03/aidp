@@ -92,21 +92,21 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           } else {
             console.log('AdminDashboard: No image URL, setting default')
             // Set default image if no custom image is uploaded
-            const defaultUrl = "/images/mary-george.svg"
+            const defaultUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
             setAgentImage(defaultUrl)
             localStorage.setItem('agentImage', defaultUrl)
           }
         } else {
           console.log('AdminDashboard: API response not ok, setting default')
           // Fallback to default image if API fails
-          const defaultUrl = "/images/mary-george.svg"
+          const defaultUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
           setAgentImage(defaultUrl)
           localStorage.setItem('agentImage', defaultUrl)
         }
       } catch (error) {
         console.error('AdminDashboard: Failed to load agent image:', error)
         // Fallback to default image on error
-        const defaultUrl = "/images/mary-george.svg"
+        const defaultUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
         setAgentImage(defaultUrl)
         localStorage.setItem('agentImage', defaultUrl)
       }
@@ -118,7 +118,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     // Listen for agent image updates
     const handleImageUpdate = (event: any) => {
       console.log('AdminDashboard: Agent image updated:', event.detail.imageUrl)
-      const newImageUrl = event.detail.imageUrl || "/images/mary-george.svg"
+      const newImageUrl = event.detail.imageUrl || "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
       setAgentImage(newImageUrl)
       if (newImageUrl) {
         localStorage.setItem('agentImage', newImageUrl)

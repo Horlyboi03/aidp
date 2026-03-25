@@ -117,8 +117,10 @@ export async function POST(request: NextRequest) {
         console.log('Messages POST: Conversation updated successfully')
       } catch (updateError) {
         console.error('Messages POST: Failed to update conversation:', updateError)
+        console.error('Update error details:', updateError instanceof Error ? updateError.message : updateError)
+        console.error('Update error stack:', updateError instanceof Error ? updateError.stack : 'No stack')
         return NextResponse.json(
-          { success: false, message: 'Failed to update conversation', error: updateError instanceof Error ? updateError.message : 'Unknown error' },
+          { success: false, message: 'Failed to update conversation', error: updateError instanceof Error ? updateError.message : 'Unknown error', details: 'Check server logs' },
           { status: 500 }
         )
       }
