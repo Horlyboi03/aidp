@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserByEmail } from '../../../../lib/postgres-database'
+import { getUserByEmail, savePasswordResetToken } from '../../../../lib/postgres-database'
+import { sendEmail, getPasswordResetEmailTemplate } from '../../../../lib/emailService'
+import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,18 +25,32 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // In a real application, you would:
-    // 1. Generate a password reset token
-    // 2. Store it in the database with expiration
-    // 3. Send an email with the reset link
+    // Generate a secure 6-digit reset token
+    const resetToken = crypto.randomInt(100000, 999999).toString()
     
-    // For now, we'll just return success
-    // You can integrate with your email service later
-    console.log(`Password reset requested for: ${email}`)
+    // Token expires in 1 hour
+    const expiry = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+    
+    // Save token to database
+    await savePasswordResetToken(email, resetToken, expiry)
+    
+    // Create reset URL
+    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://aidpprogramapply.vercel.app'}/reset-password?token=${resetToken}`
+    
+    // Send email
+    const emailSent = await sendEmail({
+      to: email,
+      subject: '🔐 Reset Your AIDP Account Password',
+      html: getPasswordResetEmailTemplate(user.fullName || 'User', resetToken, resetUrl)
+    })
+
+    if (!emailSent) {
+      console.error('Failed to send password reset email to:', email)
+    }
     
     return NextResponse.json({
       success: true,
-      message: 'Password reset instructions have been sent to your email. Please contact maryygeorge193@gmail.com if you need assistance.'
+      message: 'Password reset instructions have been sent to your email. Please check your inbox.'
     })
   } catch (error) {
     console.error('Forgot password error:', error)

@@ -37,6 +37,8 @@ export async function initializeTables() {
         country TEXT,
         password TEXT NOT NULL,
         applications TEXT DEFAULT '[]',
+        resetToken TEXT,
+        resetTokenExpiry TEXT,
         createdAt TEXT NOT NULL
       )
     `
@@ -408,6 +410,65 @@ export async function markMessagesAsRead(conversationId: string, isAdmin: boolea
     `
   } catch (error) {
     console.error('Error marking messages as read:', error)
+    throw error
+  }
+}
+
+// Password reset functions
+export async function savePasswordResetToken(email: string, token: string, expiry: string) {
+  try {
+    await initializeTables()
+    await sql`
+      UPDATE users 
+      SET resetToken = ${token}, resetTokenExpiry = ${expiry}
+      WHERE email = ${email}
+    `
+    return true
+  } catch (error) {
+    console.error('Error saving password reset token:', error)
+    throw error
+  }
+}
+
+export async function verifyPasswordResetToken(token: string) {
+  try {
+    await initializeTables()
+    const { rows } = await sql`
+      SELECT * FROM users 
+      WHERE resetToken = ${token} 
+      AND resetTokenExpiry > ${new Date().toISOString()}
+    `
+    const user = rows[0]
+    if (user) {
+      // Map lowercase postgres fields to camelCase
+      if (user.fullname && !user.fullName) {
+        user.fullName = user.fullname
+      }
+      if (user.resettoken && !user.resetToken) {
+        user.resetToken = user.resettoken
+      }
+      if (user.resettokenexpiry && !user.resetTokenExpiry) {
+        user.resetTokenExpiry = user.resettokenexpiry
+      }
+    }
+    return user
+  } catch (error) {
+    console.error('Error verifying password reset token:', error)
+    throw error
+  }
+}
+
+export async function updatePassword(email: string, newPassword: string) {
+  try {
+    await initializeTables()
+    await sql`
+      UPDATE users 
+      SET password = ${newPassword}, resetToken = NULL, resetTokenExpiry = NULL
+      WHERE email = ${email}
+    `
+    return true
+  } catch (error) {
+    console.error('Error updating password:', error)
     throw error
   }
 }

@@ -215,3 +215,70 @@ export function getWelcomeEmailTemplate(applicantName: string): string {
     </html>
   `
 }
+
+export function getPasswordResetEmailTemplate(applicantName: string, resetToken: string, resetUrl: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; background: #FF6B6B; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .token-box { background: #fff; border: 2px dashed #FF6B6B; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        .warning { background: #FFF3CD; border-left: 4px solid #FFC107; padding: 15px; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🔐 Password Reset Request</h1>
+          <p>Reset Your AIDP Account Password</p>
+        </div>
+        <div class="content">
+          <p>Dear ${applicantName},</p>
+          
+          <p>We received a request to reset the password for your <strong>AIDP Grant Program</strong> account.</p>
+          
+          <p>Click the button below to reset your password:</p>
+          
+          <div style="text-align: center;">
+            <a href="${resetUrl}" class="button">Reset Password</a>
+          </div>
+          
+          <p>Or use this reset code:</p>
+          
+          <div class="token-box">${resetToken}</div>
+          
+          <div class="warning">
+            <strong>⚠️ Important Security Information:</strong>
+            <ul style="margin: 10px 0;">
+              <li>This reset link expires in 1 hour</li>
+              <li>If you didn't request this reset, please ignore this email</li>
+              <li>Never share this code with anyone</li>
+              <li>AIDP staff will never ask for your password or reset code</li>
+            </ul>
+          </div>
+          
+          <h3>Need Help?</h3>
+          <p>If you're having trouble resetting your password or didn't request this change, please contact our Program Director:</p>
+          
+          <p><strong>Mary George</strong><br>
+          Email: maryygeorge193@gmail.com</p>
+          
+          <p>Best regards,<br>
+          <strong>AIDP Grant Program Team</strong></p>
+        </div>
+        <div class="footer">
+          <p>This is an automated email from the AIDP Grant Program. Please do not reply to this email.</p>
+          <p>If you didn't request a password reset, you can safely ignore this email.</p>
+          <p>&copy; ${new Date().getFullYear()} AIDP Grant Program. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}
