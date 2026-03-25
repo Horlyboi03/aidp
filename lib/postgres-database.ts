@@ -209,74 +209,108 @@ export async function getUserApplications(userId: string) {
 
 // Conversation functions
 export async function saveConversation(conversation: any) {
-  await initializeTables()
-  
-  await sql`
-    INSERT INTO conversations (
-      id, applicantName, applicantEmail, lastMessage, lastMessageAt, unreadCount, createdAt
-    ) VALUES (
-      ${conversation.id},
-      ${conversation.applicantName},
-      ${conversation.applicantEmail},
-      ${conversation.lastMessage || null},
-      ${conversation.lastMessageAt || null},
-      ${conversation.unreadCount || 0},
-      ${conversation.createdAt || new Date().toISOString()}
-    )
-    ON CONFLICT (id) DO UPDATE SET
-      lastMessage = ${conversation.lastMessage || null},
-      lastMessageAt = ${conversation.lastMessageAt || null},
-      unreadCount = ${conversation.unreadCount || 0}
-  `
+  try {
+    await initializeTables()
+    
+    console.log('saveConversation: Saving conversation:', conversation.id)
+    await sql`
+      INSERT INTO conversations (
+        id, applicantName, applicantEmail, lastMessage, lastMessageAt, unreadCount, createdAt
+      ) VALUES (
+        ${conversation.id},
+        ${conversation.applicantName},
+        ${conversation.applicantEmail},
+        ${conversation.lastMessage || null},
+        ${conversation.lastMessageAt || null},
+        ${conversation.unreadCount || 0},
+        ${conversation.createdAt || new Date().toISOString()}
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        lastMessage = ${conversation.lastMessage || null},
+        lastMessageAt = ${conversation.lastMessageAt || null},
+        unreadCount = ${conversation.unreadCount || 0}
+    `
+    console.log('saveConversation: Conversation saved successfully')
 
-  return conversation
+    return conversation
+  } catch (error) {
+    console.error('Error saving conversation:', error)
+    throw error
+  }
 }
 
 export async function getAllConversations() {
-  await initializeTables()
-  const { rows } = await sql`SELECT * FROM conversations ORDER BY lastMessageAt DESC NULLS LAST`
-  return rows
+  try {
+    await initializeTables()
+    const { rows } = await sql`SELECT * FROM conversations ORDER BY lastMessageAt DESC NULLS LAST`
+    return rows
+  } catch (error) {
+    console.error('Error getting all conversations:', error)
+    throw error
+  }
 }
 
 export async function getConversationById(id: string) {
-  await initializeTables()
-  const { rows } = await sql`SELECT * FROM conversations WHERE id = ${id}`
-  return rows[0]
+  try {
+    await initializeTables()
+    const { rows } = await sql`SELECT * FROM conversations WHERE id = ${id}`
+    return rows[0]
+  } catch (error) {
+    console.error('Error getting conversation by ID:', error)
+    throw error
+  }
 }
 
 // Message functions
 export async function saveMessage(message: any) {
-  await initializeTables()
-  
-  await sql`
-    INSERT INTO messages (
-      id, conversationId, sender, message, isAdmin, delivered, read, timestamp
-    ) VALUES (
-      ${message.id},
-      ${message.conversationId},
-      ${message.sender},
-      ${message.message},
-      ${message.isAdmin ? 1 : 0},
-      ${message.delivered ? 1 : 0},
-      ${message.read ? 1 : 0},
-      ${message.timestamp}
-    )
-  `
+  try {
+    await initializeTables()
+    
+    console.log('saveMessage: Saving message:', message.id)
+    await sql`
+      INSERT INTO messages (
+        id, conversationId, sender, message, isAdmin, delivered, read, timestamp
+      ) VALUES (
+        ${message.id},
+        ${message.conversationId},
+        ${message.sender},
+        ${message.message},
+        ${message.isAdmin ? 1 : 0},
+        ${message.delivered ? 1 : 0},
+        ${message.read ? 1 : 0},
+        ${message.timestamp}
+      )
+    `
+    console.log('saveMessage: Message saved successfully')
 
-  return message
+    return message
+  } catch (error) {
+    console.error('Error saving message:', error)
+    throw error
+  }
 }
 
 export async function getMessagesByConversationId(conversationId: string) {
-  await initializeTables()
-  const { rows } = await sql`SELECT * FROM messages WHERE conversationId = ${conversationId} ORDER BY timestamp ASC`
-  return rows
+  try {
+    await initializeTables()
+    const { rows } = await sql`SELECT * FROM messages WHERE conversationId = ${conversationId} ORDER BY timestamp ASC`
+    return rows
+  } catch (error) {
+    console.error('Error getting messages by conversation ID:', error)
+    throw error
+  }
 }
 
 export async function markMessagesAsRead(conversationId: string, isAdmin: boolean) {
-  await initializeTables()
-  await sql`
-    UPDATE messages 
-    SET read = 1 
-    WHERE conversationId = ${conversationId} AND isAdmin = ${isAdmin ? 1 : 0}
-  `
+  try {
+    await initializeTables()
+    await sql`
+      UPDATE messages 
+      SET read = 1 
+      WHERE conversationId = ${conversationId} AND isAdmin = ${isAdmin ? 1 : 0}
+    `
+  } catch (error) {
+    console.error('Error marking messages as read:', error)
+    throw error
+  }
 }
