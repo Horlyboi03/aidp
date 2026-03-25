@@ -26,7 +26,23 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   const [isConnected, setIsConnected] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const conversationId = user ? `conv-${user.id}` : `conv-guest-${Date.now()}`
+  
+  // Generate conversationId - ensure it's consistent
+  const conversationId = user?.id ? `conv-${user.id}` : null
+
+  // Debug logging
+  useEffect(() => {
+    if (user) {
+      console.log('LiveChatWidget: User loaded', {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        conversationId
+      })
+    } else {
+      console.log('LiveChatWidget: No user')
+    }
+  }, [user, conversationId])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -57,7 +73,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   }, [isOpen, user])
 
   const loadConversation = async () => {
-    if (!user) return
+    if (!user || !conversationId) return
     
     try {
       const response = await fetch(`/api/messages?conversationId=${conversationId}`)
@@ -85,7 +101,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   const openChat = () => {
     setIsOpen(true)
     setUnreadCount(0)
-    if (user) {
+    if (user && conversationId) {
       // Mark admin messages as read when user opens chat
       fetch('/api/messages', {
         method: 'PUT',
@@ -102,7 +118,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   }
 
   const checkForNewMessages = async () => {
-    if (!user) return
+    if (!user || !conversationId) return
     
     try {
       const response = await fetch(`/api/messages?conversationId=${conversationId}`)
@@ -121,7 +137,25 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   }
 
   const sendMessage = async () => {
-    if (!inputText.trim() || !user) return
+    if (!inputText.trim() || !user || !conversationId) {
+      console.error('Cannot send message:', { 
+        hasInput: !!inputText.trim(), 
+        hasUser: !!user, 
+        hasConversationId: !!conversationId,
+        user 
+      })
+      if (!conversationId) {
+        toast.error('Unable to start conversation. Please refresh the page.')
+      }
+      return
+    }
+
+    // Validate user has required fields
+    if (!user.fullName || !user.email) {
+      console.error('User object missing required fields:', user)
+      toast.error('User information incomplete. Please sign in again.')
+      return
+    }
 
     const messageText = inputText
     const userMessage: Message = {
@@ -137,6 +171,17 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
     setMessages(prev => [...prev, userMessage])
     setInputText('')
 
+    const payload = {
+      conversationId: conversationId,
+      sender: user.fullName,
+      message: messageText,
+      isAdmin: false,
+      applicantName: user.fullName,
+      applicantEmail: user.email
+    }
+
+    console.log('Sending message with payload:', payload)
+
     try {
       const response = await fetch('/api/messages', {
         method: 'POST',
@@ -144,23 +189,18 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` })
         },
-        body: JSON.stringify({
-          conversationId,
-          sender: user.fullName,
-          message: messageText,
-          isAdmin: false,
-          applicantName: user.fullName,
-          applicantEmail: user.email
-        })
+        body: JSON.stringify(payload)
       })
+
+      const responseData = await response.json()
+      console.log('Server response:', responseData)
 
       if (response.ok) {
         console.log('Message sent successfully')
         toast.success('Message sent to Mary George!')
       } else {
-        const errorData = await response.json()
-        console.error('Server error:', errorData)
-        throw new Error(errorData.message || errorData.error || 'Failed to send message')
+        console.error('Server error:', responseData)
+        throw new Error(responseData.message || responseData.error || 'Failed to send message')
       }
     } catch (error) {
       console.error('Failed to send message:', error)
@@ -188,7 +228,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
         setInputText(event.detail.message)
       }
       // Mark admin messages as read when user opens chat
-      if (user) {
+      if (user && conversationId) {
         fetch('/api/messages', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
