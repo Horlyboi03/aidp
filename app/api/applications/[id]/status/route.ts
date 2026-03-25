@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getApplicationById, updateApplicationStatus } from '../../../../../lib/database'
+import { getApplicationById, updateApplicationStatus } from '../../../../../lib/postgres-database'
 import { sendEmail, getApprovalEmailTemplate, getRejectionEmailTemplate } from '../../../../../lib/emailService'
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { id } = params
   
-  const application = getApplicationById(id) as any
+  const application = await getApplicationById(id) as any
   const status = application?.status || 'pending'
   
   return NextResponse.json({ status })
@@ -29,7 +29,7 @@ export async function PUT(
       )
     }
     
-    const application = updateApplicationStatus(id, status) as any
+    const application = await updateApplicationStatus(id, status) as any
     
     if (!application) {
       return NextResponse.json(

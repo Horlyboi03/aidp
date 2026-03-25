@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserById, addApplicationToUser } from '../../../../lib/database'
+import { getUserById, addApplicationToUser } from '../../../../lib/postgres-database'
 import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 
-function getUserFromToken(request: NextRequest) {
+async function getUserFromToken(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,7 +13,7 @@ function getUserFromToken(request: NextRequest) {
 
     const token = authHeader.substring(7)
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string, email: string }
-    return getUserById(decoded.userId)
+    return await getUserById(decoded.userId)
   } catch (error) {
     return null
   }
@@ -21,7 +21,7 @@ function getUserFromToken(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = getUserFromToken(request)
+    const user = await getUserFromToken(request)
     
     if (!user) {
       return NextResponse.json(
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Link application to user
-    const success = addApplicationToUser(user.id, applicationId)
+    const success = await addApplicationToUser(user.id, applicationId)
 
     if (success) {
       return NextResponse.json({

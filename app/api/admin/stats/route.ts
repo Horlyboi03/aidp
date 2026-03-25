@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { getAllApplications, getApplicationStats } from '../../../../lib/database'
+import { getAllApplications, getApplicationStats } from '../../../../lib/postgres-database'
 
 export async function GET() {
   try {
-    const realStats = getApplicationStats()
+    const realStats = await getApplicationStats()
     
     // Calculate additional metrics
-    const applications = getAllApplications() as any[]
+    const applications = await getAllApplications() as any[]
     const today = new Date().toDateString()
     const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     

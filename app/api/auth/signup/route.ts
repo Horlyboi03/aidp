@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { saveUser, getUserByEmail } from '../../../../lib/database'
+import { saveUser, getUserByEmail } from '../../../../lib/postgres-database'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = getUserByEmail(email)
+    const existingUser = await getUserByEmail(email)
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User already exists with this email' },
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     }
 
-    saveUser(user)
+    await saveUser(user)
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = user

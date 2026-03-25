@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserByEmail } from '../../../../lib/database'
+import { getUserByEmail } from '../../../../lib/postgres-database'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user from database
-    const user = getUserByEmail(email) as any
+    const user = await getUserByEmail(email) as any
 
     if (!user) {
       return NextResponse.json(

@@ -6,7 +6,7 @@ import {
   saveMessage, 
   getMessagesByConversationId,
   markMessagesAsRead 
-} from '../../../lib/database'
+} from '../../../lib/postgres-database'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -14,9 +14,9 @@ export async function GET(request: NextRequest) {
   
   if (conversationId) {
     // Get specific conversation with messages
-    const conversation = getConversationById(conversationId) as any
+    const conversation = await getConversationById(conversationId) as any
     if (conversation) {
-      const messages = getMessagesByConversationId(conversationId)
+      const messages = await getMessagesByConversationId(conversationId)
       return NextResponse.json({ 
         conversation: {
           ...conversation,
@@ -28,11 +28,13 @@ export async function GET(request: NextRequest) {
   }
   
   // Get all conversations with their messages
-  const conversations = getAllConversations() as any[]
-  const conversationsWithMessages = conversations.map(conv => ({
-    ...conv,
-    messages: getMessagesByConversationId(conv.id)
-  }))
+  const conversations = await getAllConversations() as any[]
+  const conversationsWithMessages = await Promise.all(
+    conversations.map(async (conv) => ({
+      ...conv,
+      messages: await getMessagesByConversationId(conv.id)
+    }))
+  )
   
   return NextResponse.json({ conversations: conversationsWithMessages })
 }
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest) {
   try {
     const { conversationId, sender, message, isAdmin, applicantName, applicantEmail } = await request.json()
     
-    let conversation = getConversationById(conversationId) as any
+    let conversation = await getConversationById(conversationId) as any
     
     if (!conversation) {
       // Create new conversation
@@ -54,7 +56,7 @@ export async function POST(request: NextRequest) {
         unreadCount: isAdmin ? 0 : 1,
         createdAt: new Date().toISOString()
       }
-      saveConversation(conversation)
+      await saveConversation(conversation)
     } else {
       // Update existing conversation
       conversation.lastMessage = message
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
       if (!isAdmin) {
         conversation.unreadCount = (conversation.unreadCount || 0) + 1
       }
-      saveConversation(conversation)
+      await saveConversation(conversation)
     }
     
     // Add new message
@@ -77,10 +79,10 @@ export async function POST(request: NextRequest) {
       delivered: true
     }
     
-    saveMessage(newMessage)
+    await saveMessage(newMessage)
     
     // Get all messages for this conversation
-    const messages = getMessagesByConversationId(conversationId)
+    const messages = await getMessagesByConversationId(conversationId)
     
     return NextResponse.json({ 
       success: true, 
@@ -103,19 +105,19 @@ export async function PUT(request: NextRequest) {
   try {
     const { conversationId, markAsRead, markAdminMessagesAsRead } = await request.json()
     
-    const conversation = getConversationById(conversationId) as any
+    const conversation = await getConversationById(conversationId) as any
     
     if (conversation) {
       if (markAsRead) {
         // Mark all user messages as read (admin reading user messages)
-        markMessagesAsRead(conversationId, false)
+        await markMessagesAsRead(conversationId, false)
         conversation.unreadCount = 0
-        saveConversation(conversation)
+        await saveConversation(conversation)
       }
       
       if (markAdminMessagesAsRead) {
         // Mark all admin messages as read (user reading admin messages)
-        markMessagesAsRead(conversationId, true)
+        await markMessagesAsRead(conversationId, true)
       }
     }
     

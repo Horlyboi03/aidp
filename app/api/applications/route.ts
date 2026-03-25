@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { saveApplication, getAllApplications, getApplicationStats } from '../../../lib/database'
+import { saveApplication, getAllApplications, getApplicationStats } from '../../../lib/postgres-database'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('Creating application:', application)
-    saveApplication(application)
+    await saveApplication(application)
     console.log('Application saved to database')
     
     // Create submission notification
@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const applications = getAllApplications()
-    const stats = getApplicationStats()
+    const applications = await getAllApplications()
+    const stats = await getApplicationStats()
     
     console.log('GET applications - count:', applications.length)
     console.log('Applications:', applications)
