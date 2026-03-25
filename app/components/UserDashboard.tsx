@@ -105,18 +105,26 @@ export default function UserDashboard({ user, token, onSignOut, onApplyNew }: Us
   return (
     <section className="min-h-screen py-12 px-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* Header with Back Button */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           className="glass-effect rounded-3xl p-8 mb-8"
         >
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex justify-between items-center flex-wrap gap-4">
+            <div className="flex-1">
               <h1 className="text-3xl font-bold gradient-text mb-2">Welcome back, {user.fullName}!</h1>
               <p className="text-gray-300">Manage your grant applications and track their status</p>
             </div>
             <div className="flex space-x-4">
+              <motion.button
+                onClick={() => window.location.href = '/'}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                ← Back to Home
+              </motion.button>
               <motion.button
                 onClick={onApplyNew}
                 className="btn-coral px-6 py-3 rounded-xl font-semibold"
