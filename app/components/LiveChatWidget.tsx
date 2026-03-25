@@ -99,12 +99,13 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       if (response.ok) {
         const data = await response.json()
         if (data.conversation && data.conversation.messages) {
+          const senderName = chatUser.fullName || chatUser.name || (chatUser as any).full_name || 'User'
           const formattedMessages = data.conversation.messages.map((msg: any) => ({
             id: msg.id,
             text: msg.message,
             sender: msg.isAdmin ? 'admin' : 'user',
             timestamp: new Date(msg.timestamp),
-            senderName: msg.isAdmin ? 'Mary George' : chatUser.fullName,
+            senderName: msg.isAdmin ? 'Mary George' : senderName,
             delivered: msg.delivered || true,
             read: msg.read || false
           }))
@@ -178,12 +179,18 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       return
     }
 
-    // Validate chatUser has required fields
-    if (!chatUser.fullName || !chatUser.email) {
+    // Get fullName and email with fallbacks
+    const senderName = chatUser.fullName || chatUser.name || (chatUser as any).full_name || 'User'
+    const senderEmail = chatUser.email || (chatUser as any).user_email || ''
+    
+    console.log('Extracted sender info:', { senderName, senderEmail })
+
+    // Validate we have at least a name and email
+    if (!senderName || senderName === 'User' || !senderEmail) {
       console.error('User object missing required fields:', chatUser)
-      console.error('chatUser.fullName:', chatUser.fullName)
-      console.error('chatUser.email:', chatUser.email)
-      toast.error('User information incomplete. Please sign in again.')
+      console.error('senderName:', senderName)
+      console.error('senderEmail:', senderEmail)
+      toast.error('Unable to send message. Please sign out and sign in again.')
       return
     }
 
@@ -193,7 +200,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       text: messageText,
       sender: 'user',
       timestamp: new Date(),
-      senderName: chatUser.fullName,
+      senderName: senderName,
       delivered: true,
       read: false
     }
@@ -203,11 +210,11 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
 
     const payload = {
       conversationId: conversationId,
-      sender: chatUser.fullName,
+      sender: senderName,
       message: messageText,
       isAdmin: false,
-      applicantName: chatUser.fullName,
-      applicantEmail: chatUser.email
+      applicantName: senderName,
+      applicantEmail: senderEmail
     }
 
     console.log('Sending message with payload:', payload)

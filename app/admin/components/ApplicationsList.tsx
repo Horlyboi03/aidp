@@ -310,14 +310,14 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white/98 backdrop-blur-xl rounded-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200"
+            className="bg-white rounded-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-4 md:mb-6 pb-4 border-b border-gray-200">
+            <div className="flex justify-between items-center mb-4 md:mb-6 pb-4 border-b border-gray-300">
               <h3 className="text-xl md:text-2xl font-bold text-gray-900">Application Details</h3>
               <button
                 onClick={() => setSelectedApp(null)}
-                className="text-gray-600 hover:text-gray-900 text-3xl leading-none"
+                className="text-gray-700 hover:text-gray-900 text-3xl leading-none font-bold"
               >
                 ×
               </button>
