@@ -115,13 +115,41 @@ export async function saveApplication(application: any) {
 export async function getAllApplications() {
   await initializeTables()
   const { rows } = await sql`SELECT * FROM applications ORDER BY submittedAt DESC`
-  return rows
+  // Map lowercase postgres fields to camelCase
+  return rows.map(app => ({
+    ...app,
+    fullName: app.fullname || app.fullName,
+    grantAmount: app.grantamount || app.grantAmount,
+    grantPurpose: app.grantpurpose || app.grantPurpose,
+    paymentMethod: app.paymentmethod || app.paymentMethod,
+    maritalStatus: app.maritalstatus || app.maritalStatus,
+    monthlyIncome: app.monthlyincome || app.monthlyIncome,
+    submittedAt: app.submittedat || app.submittedAt,
+    updatedAt: app.updatedat || app.updatedAt,
+    createdAt: app.createdat || app.createdAt
+  }))
 }
 
 export async function getApplicationById(id: string) {
   await initializeTables()
   const { rows } = await sql`SELECT * FROM applications WHERE id = ${id}`
-  return rows[0]
+  const app = rows[0]
+  if (app) {
+    // Map lowercase postgres fields to camelCase
+    return {
+      ...app,
+      fullName: app.fullname || app.fullName,
+      grantAmount: app.grantamount || app.grantAmount,
+      grantPurpose: app.grantpurpose || app.grantPurpose,
+      paymentMethod: app.paymentmethod || app.paymentMethod,
+      maritalStatus: app.maritalstatus || app.maritalStatus,
+      monthlyIncome: app.monthlyincome || app.monthlyIncome,
+      submittedAt: app.submittedat || app.submittedAt,
+      updatedAt: app.updatedat || app.updatedAt,
+      createdAt: app.createdat || app.createdAt
+    }
+  }
+  return app
 }
 
 export async function updateApplicationStatus(id: string, status: string) {
