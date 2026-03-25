@@ -10,6 +10,18 @@ export async function GET() {
     // Initialize tables
     await initializeTables()
     
+    // Add reset token columns if they don't exist
+    try {
+      await sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS resetToken TEXT,
+        ADD COLUMN IF NOT EXISTS resetTokenExpiry TEXT
+      `
+      console.log('✅ Reset token columns added/verified')
+    } catch (alterError) {
+      console.log('Note: Could not alter users table (columns may already exist):', alterError)
+    }
+    
     // Check if tables exist
     const tables = await sql`
       SELECT table_name 
@@ -30,7 +42,8 @@ export async function GET() {
       database: 'Connected to Vercel Postgres',
       tables: tables.rows.map(t => t.table_name),
       conversationsCount: parseInt(conversations.rows[0].count),
-      messagesCount: parseInt(messages.rows[0].count)
+      messagesCount: parseInt(messages.rows[0].count),
+      migrationRun: true
     })
   } catch (error) {
     console.error('Database test error:', error)
