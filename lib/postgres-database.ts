@@ -141,33 +141,43 @@ export async function getApplicationStats() {
 
 // User functions
 export async function saveUser(user: any) {
-  await initializeTables()
-  
-  await sql`
-    INSERT INTO users (id, fullName, email, phone, country, password, applications, createdAt)
-    VALUES (
-      ${user.id},
-      ${user.fullName},
-      ${user.email},
-      ${user.phone || null},
-      ${user.country || null},
-      ${user.password},
-      ${user.applications || '[]'},
-      ${user.createdAt}
-    )
-  `
+  try {
+    await initializeTables()
+    
+    await sql`
+      INSERT INTO users (id, fullName, email, phone, country, password, applications, createdAt)
+      VALUES (
+        ${user.id},
+        ${user.fullName},
+        ${user.email},
+        ${user.phone || null},
+        ${user.country || null},
+        ${user.password},
+        ${user.applications || '[]'},
+        ${user.createdAt}
+      )
+    `
 
-  return user
+    return user
+  } catch (error) {
+    console.error('Error saving user:', error)
+    throw error
+  }
 }
 
 export async function getUserByEmail(email: string) {
-  await initializeTables()
-  const { rows } = await sql`SELECT * FROM users WHERE email = ${email}`
-  const user = rows[0]
-  if (user && user.applications) {
-    user.applications = JSON.parse(user.applications)
+  try {
+    await initializeTables()
+    const { rows } = await sql`SELECT * FROM users WHERE email = ${email}`
+    const user = rows[0]
+    if (user && user.applications) {
+      user.applications = JSON.parse(user.applications)
+    }
+    return user
+  } catch (error) {
+    console.error('Error getting user by email:', error)
+    throw error
   }
-  return user
 }
 
 export async function getUserById(id: string) {
