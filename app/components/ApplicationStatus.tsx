@@ -6,12 +6,16 @@ import NotificationDisplay from './NotificationDisplay'
 
 interface ApplicationStatusProps {
   applicationId: string
+  applicantInfo?: {
+    fullName: string
+    email: string
+  }
   onBack: () => void
 }
 
 type Status = 'pending' | 'approved' | 'rejected'
 
-export default function ApplicationStatus({ applicationId, onBack }: ApplicationStatusProps) {
+export default function ApplicationStatus({ applicationId, applicantInfo, onBack }: ApplicationStatusProps) {
   const [status, setStatus] = useState<Status>('pending')
   const [loading, setLoading] = useState(true)
 

@@ -24,6 +24,7 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [agentImage, setAgentImage] = useState<string>("/images/mary-george.svg")
+  const [guestInfo, setGuestInfo] = useState<{ fullName: string; email: string; applicationId?: string } | null>(null)
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -190,7 +191,7 @@ export default function Home() {
         </div>
 
         {/* Live Chat Widget */}
-        <LiveChatWidget user={user} token={token} />
+        <LiveChatWidget user={user} token={token} guestInfo={guestInfo || undefined} />
       </main>
     )
   }
@@ -257,6 +258,7 @@ export default function Home() {
               onBack={prevPage} 
               user={user} 
               token={token}
+              onGuestSubmit={(info) => setGuestInfo(info)}
             />
           </motion.div>
         ) : (
@@ -284,7 +286,7 @@ export default function Home() {
       />
 
       {/* Live Chat Widget */}
-      <LiveChatWidget user={user} token={token} />
+      <LiveChatWidget user={user} token={token} guestInfo={guestInfo || undefined} />
     </main>
   )
 }

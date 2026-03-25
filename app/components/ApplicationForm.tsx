@@ -28,11 +28,13 @@ interface ApplicationFormProps {
   onBack: () => void
   user?: any
   token?: string | null
+  onGuestSubmit?: (guestInfo: { fullName: string; email: string; applicationId: string }) => void
 }
 
-export default function ApplicationForm({ onBack, user, token }: ApplicationFormProps) {
+export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: ApplicationFormProps) {
   const [submitted, setSubmitted] = useState(false)
   const [applicationId, setApplicationId] = useState<string | null>(null)
+  const [applicationData, setApplicationData] = useState<any>(null)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
@@ -49,7 +51,7 @@ export default function ApplicationForm({ onBack, user, token }: ApplicationForm
       const loadingToast = toast.loading('Submitting your application...')
       
       // Prepare application data
-      const applicationData = {
+      const applicationPayload = {
         ...data,
         files: uploadedFiles.map(f => f.name),
         userId: user?.id // Link to user if authenticated
@@ -62,7 +64,7 @@ export default function ApplicationForm({ onBack, user, token }: ApplicationForm
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` })
         },
-        body: JSON.stringify(applicationData)
+        body: JSON.stringify(applicationPayload)
       })
       
       console.log('Response status:', response.status)
@@ -89,8 +91,20 @@ export default function ApplicationForm({ onBack, user, token }: ApplicationForm
           }
         }
         
+        // Store application data for guest chat
+        setApplicationData(data)
         setApplicationId(result.id)
         setSubmitted(true)
+        
+        // If not authenticated, notify parent about guest submission
+        if (!user && onGuestSubmit) {
+          onGuestSubmit({
+            fullName: data.fullName,
+            email: data.email,
+            applicationId: result.id
+          })
+        }
+        
         toast.success('Application submitted successfully!')
         console.log('Application submitted with ID:', result.id)
       } else {
@@ -105,11 +119,16 @@ export default function ApplicationForm({ onBack, user, token }: ApplicationForm
   if (submitted && applicationId) {
     return (
       <ApplicationStatus 
-        applicationId={applicationId} 
+        applicationId={applicationId}
+        applicantInfo={applicationData ? {
+          fullName: applicationData.fullName,
+          email: applicationData.email
+        } : undefined}
         onBack={() => {
           // Don't go back to main page, just reset the form state
           setSubmitted(false)
           setApplicationId(null)
+          setApplicationData(null)
         }} 
       />
     )

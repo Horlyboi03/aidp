@@ -17,9 +17,14 @@ interface Message {
 interface LiveChatWidgetProps {
   user?: any
   token?: string | null
+  guestInfo?: {
+    fullName: string
+    email: string
+    applicationId?: string
+  }
 }
 
-export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
+export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
@@ -27,22 +32,30 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   const [unreadCount, setUnreadCount] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
+  // Use either authenticated user or guest info
+  const chatUser = user || (guestInfo ? {
+    id: guestInfo.applicationId || `guest-${Date.now()}`,
+    fullName: guestInfo.fullName,
+    email: guestInfo.email
+  } : null)
+  
   // Generate conversationId - ensure it's consistent
-  const conversationId = user?.id ? `conv-${user.id}` : null
+  const conversationId = chatUser?.id ? `conv-${chatUser.id}` : null
 
   // Debug logging
   useEffect(() => {
-    if (user) {
+    if (chatUser) {
       console.log('LiveChatWidget: User loaded', {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        conversationId
+        id: chatUser.id,
+        fullName: chatUser.fullName,
+        email: chatUser.email,
+        conversationId,
+        isGuest: !!guestInfo
       })
     } else {
-      console.log('LiveChatWidget: No user')
+      console.log('LiveChatWidget: No user or guest info')
     }
-  }, [user, conversationId])
+  }, [chatUser, conversationId, guestInfo])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -54,26 +67,26 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
 
   // Load existing conversation when chat opens
   useEffect(() => {
-    if (isOpen && user) {
+    if (isOpen && chatUser) {
       loadConversation()
       // Poll for new messages every 3 seconds when chat is open
       const interval = setInterval(loadConversation, 3000)
       return () => clearInterval(interval)
     }
-  }, [isOpen, user])
+  }, [isOpen, chatUser])
 
 
 
   // Poll for new messages when chat is closed (for unread count)
   useEffect(() => {
-    if (!isOpen && user) {
+    if (!isOpen && chatUser) {
       const interval = setInterval(checkForNewMessages, 10000)
       return () => clearInterval(interval)
     }
-  }, [isOpen, user])
+  }, [isOpen, chatUser])
 
   const loadConversation = async () => {
-    if (!user || !conversationId) return
+    if (!chatUser || !conversationId) return
     
     try {
       const response = await fetch(`/api/messages?conversationId=${conversationId}`)
@@ -85,7 +98,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
             text: msg.message,
             sender: msg.isAdmin ? 'admin' : 'user',
             timestamp: new Date(msg.timestamp),
-            senderName: msg.isAdmin ? 'Mary George' : user.fullName,
+            senderName: msg.isAdmin ? 'Mary George' : chatUser.fullName,
             delivered: msg.delivered || true,
             read: msg.read || false
           }))
@@ -101,7 +114,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   const openChat = () => {
     setIsOpen(true)
     setUnreadCount(0)
-    if (user && conversationId) {
+    if (chatUser && conversationId) {
       // Mark admin messages as read when user opens chat
       fetch('/api/messages', {
         method: 'PUT',
@@ -118,7 +131,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   }
 
   const checkForNewMessages = async () => {
-    if (!user || !conversationId) return
+    if (!chatUser || !conversationId) return
     
     try {
       const response = await fetch(`/api/messages?conversationId=${conversationId}`)
@@ -137,12 +150,12 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
   }
 
   const sendMessage = async () => {
-    if (!inputText.trim() || !user || !conversationId) {
+    if (!inputText.trim() || !chatUser || !conversationId) {
       console.error('Cannot send message:', { 
         hasInput: !!inputText.trim(), 
-        hasUser: !!user, 
+        hasChatUser: !!chatUser, 
         hasConversationId: !!conversationId,
-        user 
+        chatUser 
       })
       if (!conversationId) {
         toast.error('Unable to start conversation. Please refresh the page.')
@@ -150,9 +163,9 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
       return
     }
 
-    // Validate user has required fields
-    if (!user.fullName || !user.email) {
-      console.error('User object missing required fields:', user)
+    // Validate chatUser has required fields
+    if (!chatUser.fullName || !chatUser.email) {
+      console.error('User object missing required fields:', chatUser)
       toast.error('User information incomplete. Please sign in again.')
       return
     }
@@ -163,7 +176,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
       text: messageText,
       sender: 'user',
       timestamp: new Date(),
-      senderName: user.fullName,
+      senderName: chatUser.fullName,
       delivered: true,
       read: false
     }
@@ -173,11 +186,11 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
 
     const payload = {
       conversationId: conversationId,
-      sender: user.fullName,
+      sender: chatUser.fullName,
       message: messageText,
       isAdmin: false,
-      applicantName: user.fullName,
-      applicantEmail: user.email
+      applicantName: chatUser.fullName,
+      applicantEmail: chatUser.email
     }
 
     console.log('Sending message with payload:', payload)
@@ -228,7 +241,7 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
         setInputText(event.detail.message)
       }
       // Mark admin messages as read when user opens chat
-      if (user && conversationId) {
+      if (chatUser && conversationId) {
         fetch('/api/messages', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -244,9 +257,9 @@ export default function LiveChatWidget({ user, token }: LiveChatWidgetProps) {
 
     window.addEventListener('openChat', handleOpenChat)
     return () => window.removeEventListener('openChat', handleOpenChat)
-  }, [user, conversationId])
+  }, [chatUser, conversationId])
 
-  if (!user) {
+  if (!chatUser) {
     return (
       <motion.button
         onClick={() => {
