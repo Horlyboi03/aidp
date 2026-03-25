@@ -9,6 +9,17 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions): Promise<boolean> {
   try {
+    console.log('📧 Sending email...')
+    console.log('To:', to)
+    console.log('Subject:', subject)
+    console.log('Email config:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      user: process.env.EMAIL_USER,
+      hasPassword: !!process.env.EMAIL_PASS,
+      from: process.env.EMAIL_FROM
+    })
+
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -19,17 +30,25 @@ export async function sendEmail({ to, subject, html }: EmailOptions): Promise<bo
       },
     })
 
-    await transporter.sendMail({
+    console.log('Transporter created, sending email...')
+
+    const info = await transporter.sendMail({
       from: process.env.EMAIL_FROM || 'AIDP Grant Program <noreply@aidp.com>',
       to,
       subject,
       html,
     })
 
-    console.log('✅ Email sent successfully to:', to)
+    console.log('✅ Email sent successfully!')
+    console.log('Message ID:', info.messageId)
+    console.log('Response:', info.response)
     return true
   } catch (error) {
     console.error('❌ Failed to send email:', error)
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
     return false
   }
 }
