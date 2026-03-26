@@ -85,9 +85,15 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
 
   // Poll for new messages when chat is closed (for unread count)
   useEffect(() => {
-    if (!isOpen && chatUser) {
-      const interval = setInterval(checkForNewMessages, 10000)
-      return () => clearInterval(interval)
+    if (chatUser) {
+      // Check immediately on mount
+      checkForNewMessages()
+      
+      if (!isOpen) {
+        // Poll every 5 seconds when chat is closed
+        const interval = setInterval(checkForNewMessages, 5000)
+        return () => clearInterval(interval)
+      }
     }
   }, [isOpen, chatUser])
 
@@ -145,10 +151,11 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       if (response.ok) {
         const data = await response.json()
         if (data.conversation && data.conversation.messages) {
-          const newMessageCount = data.conversation.messages.filter((msg: any) => 
-            !msg.isAdmin && !msg.read
+          // Count unread messages FROM ADMIN (not from user)
+          const unreadAdminMessages = data.conversation.messages.filter((msg: any) => 
+            msg.isAdmin && !msg.read
           ).length
-          setUnreadCount(newMessageCount)
+          setUnreadCount(unreadAdminMessages)
         }
       }
     } catch (error) {
