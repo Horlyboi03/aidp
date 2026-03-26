@@ -220,7 +220,7 @@ export default function Home() {
           <img
             src="/images/aidp-logo-white.svg"
             alt="AIDP Grant Program"
-            className="w-16 h-16 md:w-24 md:h-24 lg:w-32 lg:h-32 drop-shadow-2xl hover:scale-110 transition-transform duration-300"
+            className="w-12 h-12 md:w-24 md:h-24 lg:w-32 lg:h-32 drop-shadow-2xl hover:scale-110 transition-transform duration-300"
           />
         </motion.div>
 
