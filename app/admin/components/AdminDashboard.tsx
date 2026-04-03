@@ -61,7 +61,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
 
     loadUnreadCount()
-    const interval = setInterval(loadUnreadCount, 3000) // Check every 3 seconds
+    const interval = setInterval(loadUnreadCount, 3000)
     return () => clearInterval(interval)
   }, [])
 
@@ -77,12 +77,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           if (lastApplicationsCount > 0 && currentCount > lastApplicationsCount) {
             const newCount = currentCount - lastApplicationsCount
             setNewApplicationsCount(newCount)
-            // Show notification
             toast.success(`🎉 ${newCount} new application${newCount > 1 ? 's' : ''} received!`, {
               duration: 5000,
               icon: '📋'
             })
-            // Auto-switch to applications tab if there are new applications
             setActiveTab('applications')
           }
           
@@ -94,7 +92,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
 
     checkNewApplications()
-    const interval = setInterval(checkNewApplications, 3000) // Check every 3 seconds
+    const interval = setInterval(checkNewApplications, 3000)
     return () => clearInterval(interval)
   }, [lastApplicationsCount])
 
@@ -102,57 +100,41 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   useEffect(() => {
     const loadAgentImage = async () => {
       try {
-        console.log('AdminDashboard: Loading agent image...')
-        
-        // First try localStorage
         const savedImage = localStorage.getItem('agentImage')
         if (savedImage) {
-          console.log('AdminDashboard: Found saved image in localStorage')
           setAgentImage(savedImage)
           return
         }
         
-        // Then try API
         const response = await fetch('/api/agent/image')
-        console.log('AdminDashboard: API response status:', response.status)
         
         if (response.ok) {
           const data = await response.json()
-          console.log('AdminDashboard: API data:', data)
           
           if (data.imageUrl) {
-            console.log('AdminDashboard: Setting image URL:', data.imageUrl)
             setAgentImage(data.imageUrl)
             localStorage.setItem('agentImage', data.imageUrl)
           } else {
-            console.log('AdminDashboard: No image URL, setting default')
-            // Set default image if no custom image is uploaded
             const defaultUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
             setAgentImage(defaultUrl)
             localStorage.setItem('agentImage', defaultUrl)
           }
         } else {
-          console.log('AdminDashboard: API response not ok, setting default')
-          // Fallback to default image if API fails
           const defaultUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
           setAgentImage(defaultUrl)
           localStorage.setItem('agentImage', defaultUrl)
         }
       } catch (error) {
         console.error('AdminDashboard: Failed to load agent image:', error)
-        // Fallback to default image on error
         const defaultUrl = "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
         setAgentImage(defaultUrl)
         localStorage.setItem('agentImage', defaultUrl)
       }
     }
 
-    // Add a small delay to ensure the component is fully mounted
     const timer = setTimeout(loadAgentImage, 100)
 
-    // Listen for agent image updates
     const handleImageUpdate = (event: any) => {
-      console.log('AdminDashboard: Agent image updated:', event.detail.imageUrl)
       const newImageUrl = event.detail.imageUrl || "/images/WhatsApp Image 2026-03-12 at 8.11.50 PM.jpeg"
       setAgentImage(newImageUrl)
       if (newImageUrl) {
@@ -171,7 +153,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }, [])
 
   useEffect(() => {
-    // Fetch real stats from API
     const fetchStats = async () => {
       try {
         const response = await fetch('/api/admin/stats')
@@ -179,7 +160,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           const data = await response.json()
           setStats(data.stats)
         } else {
-          // Fallback to applications API
           const appResponse = await fetch('/api/applications')
           if (appResponse.ok) {
             const appData = await appResponse.json()
@@ -193,7 +173,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         }
       } catch (error) {
         console.error('Failed to fetch stats:', error)
-        // Fallback to default stats if API fails
         setStats({
           total: 0,
           pending: 0,
@@ -204,7 +183,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
 
     fetchStats()
-    // Refresh stats every 30 seconds
     const interval = setInterval(fetchStats, 30000)
     return () => clearInterval(interval)
   }, [refreshKey])
@@ -222,17 +200,16 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   ]
 
   return (
-    <div className="min-h-screen p-2 sm:p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-2 sm:p-3 md:p-4 lg:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header - Fully Responsive */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-effect rounded-2xl p-3 sm:p-4 md:p-6 mb-3 sm:mb-4 md:mb-8"
+          className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 mb-3 sm:mb-4 md:mb-6"
         >
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-6 w-full sm:w-auto">
-              {/* AIDP Logo - Responsive */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -240,47 +217,43 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               >
                 <img
                   src="/images/aidp-logo-white.svg"
-                  alt="AIDP Grant Program"
-                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 drop-shadow-2xl hover:scale-110 transition-transform duration-300"
+                  alt="AIDP"
+                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 drop-shadow-2xl flex-shrink-0"
                   onError={(e) => {
-                    console.error('Logo failed to load, trying fallback')
                     e.currentTarget.src = "/images/aidp-logo.svg"
                   }}
-                  onLoad={() => console.log('AIDP Logo loaded successfully')}
                 />
               </motion.div>
               
               <div className="flex-1 min-w-0">
-                <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold gradient-text truncate">AIDP Admin Dashboard</h1>
-                <p className="text-gray-300 mt-1 text-xs sm:text-sm truncate">Manage applications & communications</p>
+                <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold gradient-text truncate">AIDP Admin</h1>
+                <p className="text-gray-300 text-xs sm:text-sm truncate">Dashboard</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-end">
-              <motion.button
-                onClick={handleLogout}
-                className="px-3 sm:px-4 md:px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs sm:text-sm md:text-base"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Logout
-              </motion.button>
-            </div>
+            <motion.button
+              onClick={handleLogout}
+              className="w-full sm:w-auto px-3 sm:px-4 md:px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs sm:text-sm md:text-base font-semibold"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Logout
+            </motion.button>
           </div>
         </motion.div>
 
-        {/* Navigation Tabs - Fully Responsive with Horizontal Scroll */}
+        {/* Navigation Tabs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="glass-effect rounded-2xl p-1 sm:p-2 mb-6 sm:mb-8 overflow-x-auto"
+          className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-1 sm:p-2 mb-4 sm:mb-6 overflow-x-auto"
         >
-          <div className="flex space-x-1 sm:space-x-2 min-w-max md:min-w-0">
+          <div className="flex gap-1 sm:gap-2 min-w-max sm:min-w-0 sm:flex-wrap sm:justify-start md:justify-center">
             {tabs.map((tab) => (
               <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all whitespace-nowrap text-xs sm:text-sm md:text-base ${
+                className={`relative flex items-center justify-center gap-1 sm:gap-2 px-2.5 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base flex-shrink-0 whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'btn-coral text-white'
                     : 'text-gray-300 hover:text-white hover:bg-white/10'
@@ -288,10 +261,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span>{tab.icon}</span>
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="text-sm sm:text-base">{tab.icon}</span>
+                <span className="hidden xs:inline text-xs sm:text-sm">{tab.label}</span>
                 {tab.badge && tab.badge > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {tab.badge}
                   </span>
                 )}
@@ -300,7 +273,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           </div>
         </motion.div>
 
-        {/* Content */}
+        {/* Content Area */}
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, x: 20 }}
@@ -308,130 +281,124 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           transition={{ duration: 0.3 }}
         >
           {activeTab === 'overview' && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+            <div className="space-y-4 sm:space-y-6">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-3xl sm:text-4xl mb-2">📊</div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">{stats.total}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Total Applications</p>
-                  <p className="text-xs text-coral-400 mt-2">Click to view all</p>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">📊</div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1">{stats.total}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Total</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-3xl sm:text-4xl mb-2">⏳</div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-yellow-400 mb-1">{stats.pending}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Pending Review</p>
-                  <p className="text-xs text-coral-400 mt-2">Click to manage</p>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">⏳</div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-400 mb-1">{stats.pending}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Pending</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-3xl sm:text-4xl mb-2">✅</div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-green-400 mb-1">{stats.approved}</h3>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">✅</div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-green-400 mb-1">{stats.approved}</h3>
                   <p className="text-gray-300 text-xs sm:text-sm">Approved</p>
-                  <p className="text-xs text-coral-400 mt-2">Click to view</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-3xl sm:text-4xl mb-2">❌</div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-red-400 mb-1">{stats.rejected}</h3>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">❌</div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-red-400 mb-1">{stats.rejected}</h3>
                   <p className="text-gray-300 text-xs sm:text-sm">Rejected</p>
-                  <p className="text-xs text-coral-400 mt-2">Click to view</p>
                 </motion.div>
               </div>
 
-              {/* Additional Statistics */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+              {/* Additional Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="glass-effect rounded-2xl p-6 text-center"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center"
                 >
-                  <div className="text-4xl mb-2">📅</div>
-                  <h3 className="text-2xl font-bold text-coral-400 mb-1">{stats.todayApplications || 0}</h3>
-                  <p className="text-gray-300">Today's Applications</p>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">📅</div>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-coral-400 mb-1">{stats.todayApplications || 0}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Today</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
-                  className="glass-effect rounded-2xl p-6 text-center"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center"
                 >
-                  <div className="text-4xl mb-2">📈</div>
-                  <h3 className="text-2xl font-bold text-blue-400 mb-1">{stats.thisWeekApplications || 0}</h3>
-                  <p className="text-gray-300">This Week</p>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">📈</div>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-blue-400 mb-1">{stats.thisWeekApplications || 0}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">This Week</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
-                  className="glass-effect rounded-2xl p-6 text-center"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center"
                 >
-                  <div className="text-4xl mb-2">💰</div>
-                  <h3 className="text-xl font-bold text-green-400 mb-1">{stats.totalGrantsAwarded || '$0'}</h3>
-                  <p className="text-gray-300">Total Grants Awarded</p>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">💰</div>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-400 mb-1">{stats.totalGrantsAwarded || '$0'}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Awarded</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
-                  className="glass-effect rounded-2xl p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('messages')}
                 >
-                  <div className="text-4xl mb-2">💬</div>
-                  <h3 className="text-xl font-bold text-purple-400 mb-1">Active</h3>
-                  <p className="text-gray-300">Message Center</p>
-                  <p className="text-xs text-coral-400 mt-2">Click to open</p>
+                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">💬</div>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-purple-400 mb-1">Active</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Messages</p>
                 </motion.div>
               </div>
 
-              {/* Program Information */}
+              {/* Program Info */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 }}
-                className="glass-effect rounded-2xl p-4 sm:p-6 md:p-8"
+                className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8"
               >
-                <h3 className="text-xl sm:text-2xl font-bold gradient-text mb-4 sm:mb-6">AIDP Program Overview</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold gradient-text mb-4 sm:mb-6">AIDP Program Overview</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Program Purpose</h4>
-                    <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                      AIDP helps the poor, retired, disabled, separated, and many more. In conjunction 
-                      with the Private Grant Foundation, we issue billions of dollars in grants to 
-                      individuals every day.
+                    <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-2 sm:mb-3">Program Purpose</h4>
+                    <p className="text-gray-300 leading-relaxed text-xs sm:text-sm md:text-base">
+                      AIDP helps the poor, retired, disabled, separated, and many more. In conjunction with the Private Grant Foundation, we issue billions of dollars in grants to individuals every day.
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Grant Benefits</h4>
-                    <ul className="text-gray-300 space-y-2 text-sm sm:text-base">
+                    <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-2 sm:mb-3">Grant Benefits</h4>
+                    <ul className="text-gray-300 space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base">
                       <li>• No repayment required</li>
                       <li>• Not taxable income</li>
                       <li>• No credit check needed</li>
@@ -441,39 +408,38 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   </div>
                 </div>
               </motion.div>
-            </>
+            </div>
           )}
 
           {activeTab === 'applications' && <ApplicationsList onStatsUpdate={refreshStats} />}
           {activeTab === 'messages' && <MessagingPanel onUnreadCountChange={handleUnreadCountChange} />}
           {activeTab === 'settings' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <ChangePassword />
-              
               <AgentImageUpload />
               
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-effect rounded-2xl p-6"
+                className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8"
               >
-                <h3 className="text-xl font-bold text-white mb-4">⚙️ System Settings</h3>
-                <div className="space-y-4">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6">⚙️ System Settings</h3>
+                <div className="space-y-4 sm:space-y-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-300">Auto-approve applications</span>
-                    <button className="bg-gray-600 rounded-full w-12 h-6 relative">
+                    <span className="text-gray-300 text-sm sm:text-base">Auto-approve applications</span>
+                    <button className="bg-gray-600 rounded-full w-12 h-6 relative flex-shrink-0">
                       <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-300">Email notifications</span>
-                    <button className="bg-coral-500 rounded-full w-12 h-6 relative">
+                    <span className="text-gray-300 text-sm sm:text-base">Email notifications</span>
+                    <button className="bg-coral-500 rounded-full w-12 h-6 relative flex-shrink-0">
                       <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-300">SMS notifications</span>
-                    <button className="bg-coral-500 rounded-full w-12 h-6 relative">
+                    <span className="text-gray-300 text-sm sm:text-base">SMS notifications</span>
+                    <button className="bg-coral-500 rounded-full w-12 h-6 relative flex-shrink-0">
                       <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
                     </button>
                   </div>
