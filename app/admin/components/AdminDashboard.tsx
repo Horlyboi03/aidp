@@ -216,7 +216,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'applications', label: 'Applications', icon: '📋', badge: newApplicationsCount > 0 ? newApplicationsCount : stats.pending },
+    { id: 'applications', label: 'Application', icon: '📋', badge: stats.pending > 0 ? stats.pending : 0 },
     { id: 'messages', label: 'Messages', icon: '💬', badge: unreadMessagesCount },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ]

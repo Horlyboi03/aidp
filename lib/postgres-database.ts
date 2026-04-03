@@ -13,6 +13,7 @@ export async function initializeTables() {
         email TEXT NOT NULL,
         phone TEXT,
         country TEXT NOT NULL,
+        gender TEXT,
         maritalStatus TEXT,
         occupation TEXT,
         monthlyIncome TEXT,
@@ -90,7 +91,7 @@ export async function saveApplication(application: any) {
   
   await sql`
     INSERT INTO applications (
-      id, fullName, email, phone, country, maritalStatus, occupation,
+      id, fullName, email, phone, country, gender, maritalStatus, occupation,
       monthlyIncome, grantAmount, grantPurpose, paymentMethod, description,
       status, submittedAt
     ) VALUES (
@@ -99,6 +100,7 @@ export async function saveApplication(application: any) {
       ${application.email},
       ${application.phone || null},
       ${application.country},
+      ${application.gender || null},
       ${application.maritalStatus || null},
       ${application.occupation || null},
       ${application.monthlyIncome || null},
@@ -121,6 +123,7 @@ export async function getAllApplications() {
   return rows.map(app => ({
     ...app,
     fullName: app.fullname || app.fullName,
+    gender: app.gender,
     grantAmount: app.grantamount || app.grantAmount,
     grantPurpose: app.grantpurpose || app.grantPurpose,
     paymentMethod: app.paymentmethod || app.paymentMethod,
@@ -141,6 +144,7 @@ export async function getApplicationById(id: string) {
     return {
       ...app,
       fullName: app.fullname || app.fullName,
+      gender: app.gender,
       grantAmount: app.grantamount || app.grantAmount,
       grantPurpose: app.grantpurpose || app.grantPurpose,
       paymentMethod: app.paymentmethod || app.paymentMethod,

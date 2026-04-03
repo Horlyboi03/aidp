@@ -14,6 +14,7 @@ interface FormData {
   country: string
   address: string
   dateOfBirth: string
+  gender: string
   occupation: string
   monthlyIncome: string
   maritalStatus: string
@@ -225,6 +226,23 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
               </div>
 
               <div>
+                <label className="block text-white font-semibold mb-2">Gender *</label>
+                <select
+                  {...register('gender', { required: 'Gender is required' })}
+                  className="form-input w-full px-4 py-3 rounded-xl text-white"
+                >
+                  <option value="">Select gender</option>
+                  <option value="male" className="bg-gray-800">Male</option>
+                  <option value="female" className="bg-gray-800">Female</option>
+                  <option value="other" className="bg-gray-800">Other</option>
+                  <option value="prefer-not-to-say" className="bg-gray-800">Prefer not to say</option>
+                </select>
+                {errors.gender && <p className="text-red-400 text-sm mt-1">{errors.gender.message}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
                 <label className="block text-white font-semibold mb-2">Marital Status *</label>
                 <select
                   {...register('maritalStatus', { required: 'Marital status is required' })}
@@ -239,7 +257,6 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
                 </select>
                 {errors.maritalStatus && <p className="text-red-400 text-sm mt-1">{errors.maritalStatus.message}</p>}
               </div>
-            </div>
 
             <div>
               <label className="block text-white font-semibold mb-2">Occupation *</label>

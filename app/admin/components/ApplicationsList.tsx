@@ -352,10 +352,16 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                   <p className="text-gray-900 font-medium">{selectedApp.country}</p>
                 </div>
                 <div>
+                  <label className="text-gray-700 text-sm font-semibold">Gender</label>
+                  <p className="text-gray-900 font-medium capitalize">{(selectedApp as any).gender || 'Not specified'}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
                   <label className="text-gray-700 text-sm font-semibold">Marital Status</label>
                   <p className="text-gray-900 font-medium capitalize">{(selectedApp as any).maritalStatus || 'Not specified'}</p>
                 </div>
-              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
