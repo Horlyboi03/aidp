@@ -45,7 +45,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setRefreshKey(prev => prev + 1)
   }
 
-  // Load unread messages count and check for new applications
   useEffect(() => {
     const loadUnreadCount = async () => {
       try {
@@ -65,7 +64,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     return () => clearInterval(interval)
   }, [])
 
-  // Check for new applications
   useEffect(() => {
     const checkNewApplications = async () => {
       try {
@@ -96,7 +94,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     return () => clearInterval(interval)
   }, [lastApplicationsCount])
 
-  // Load agent image
   useEffect(() => {
     const loadAgentImage = async () => {
       try {
@@ -200,254 +197,258 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-2 sm:p-3 md:p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 mb-3 sm:mb-4 md:mb-6"
-        >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <img
-                  src="/images/aidp-logo-white.svg"
-                  alt="AIDP"
-                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 drop-shadow-2xl flex-shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.src = "/images/aidp-logo.svg"
-                  }}
-                />
-              </motion.div>
-              
-              <div className="flex-1 min-w-0">
-                <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold gradient-text truncate">AIDP Admin</h1>
-                <p className="text-gray-300 text-xs sm:text-sm truncate">Dashboard</p>
+    <div className="min-h-screen w-screen overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="w-full px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 md:py-4 lg:py-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 mb-3 sm:mb-4 md:mb-6"
+          >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto min-w-0">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex-shrink-0"
+                >
+                  <img
+                    src="/images/aidp-logo-white.svg"
+                    alt="AIDP"
+                    className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 drop-shadow-2xl"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/aidp-logo.svg"
+                    }}
+                  />
+                </motion.div>
+                
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold gradient-text truncate">AIDP Admin</h1>
+                  <p className="text-gray-300 text-xs sm:text-sm truncate">Dashboard</p>
+                </div>
               </div>
-            </div>
-            <motion.button
-              onClick={handleLogout}
-              className="w-full sm:w-auto px-3 sm:px-4 md:px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs sm:text-sm md:text-base font-semibold"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Logout
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* Navigation Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-1 sm:p-2 mb-4 sm:mb-6 overflow-x-auto"
-        >
-          <div className="flex gap-1 sm:gap-2 min-w-max sm:min-w-0 sm:flex-wrap sm:justify-start md:justify-center">
-            {tabs.map((tab) => (
               <motion.button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center justify-center gap-1 sm:gap-2 px-2.5 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base flex-shrink-0 whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'btn-coral text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                onClick={handleLogout}
+                className="w-full sm:w-auto px-3 sm:px-4 md:px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs sm:text-sm md:text-base font-semibold flex-shrink-0"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="text-sm sm:text-base">{tab.icon}</span>
-                <span className="hidden xs:inline text-xs sm:text-sm">{tab.label}</span>
-                {tab.badge && tab.badge > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                    {tab.badge}
-                  </span>
-                )}
+                Logout
               </motion.button>
-            ))}
-          </div>
-        </motion.div>
+            </div>
+          </motion.div>
 
-        {/* Content Area */}
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {activeTab === 'overview' && (
-            <div className="space-y-4 sm:space-y-6">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          {/* Navigation Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-1 sm:p-2 mb-4 sm:mb-6"
+          >
+            <div className="grid grid-cols-4 gap-1 sm:gap-2">
+              {tabs.map((tab) => (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 px-1 sm:px-3 md:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base ${
+                    activeTab === tab.id
+                      ? 'btn-coral text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="text-sm sm:text-base">{tab.icon}</span>
+                  <span className="hidden sm:inline text-xs sm:text-sm">{tab.label}</span>
+                  {tab.badge && tab.badge > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {tab.badge}
+                    </span>
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Content Area */}
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-full"
+          >
+            {activeTab === 'overview' && (
+              <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 w-full">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => setActiveTab('applications')}
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">📊</div>
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-0.5 sm:mb-1">{stats.total}</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">Total</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => setActiveTab('applications')}
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">⏳</div>
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-yellow-400 mb-0.5 sm:mb-1">{stats.pending}</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">Pending</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => setActiveTab('applications')}
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">✅</div>
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-green-400 mb-0.5 sm:mb-1">{stats.approved}</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">Approved</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => setActiveTab('applications')}
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">❌</div>
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-red-400 mb-0.5 sm:mb-1">{stats.rejected}</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">Rejected</p>
+                  </motion.div>
+                </div>
+
+                {/* Additional Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 w-full">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center"
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">📅</div>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-coral-400 mb-0.5 sm:mb-1">{stats.todayApplications || 0}</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">Today</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center"
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">📈</div>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-blue-400 mb-0.5 sm:mb-1">{stats.thisWeekApplications || 0}</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">This Week</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center"
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">💰</div>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-400 mb-0.5 sm:mb-1">{stats.totalGrantsAwarded || '$0'}</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">Awarded</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                    className="glass-effect rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => setActiveTab('messages')}
+                  >
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-1 sm:mb-2">💬</div>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-purple-400 mb-0.5 sm:mb-1">Active</h3>
+                    <p className="text-gray-300 text-xs sm:text-sm">Messages</p>
+                  </motion.div>
+                </div>
+
+                {/* Program Info */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
-                  onClick={() => setActiveTab('applications')}
+                  transition={{ delay: 0.9 }}
+                  className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 w-full"
                 >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">📊</div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1">{stats.total}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Total</p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
-                  onClick={() => setActiveTab('applications')}
-                >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">⏳</div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-400 mb-1">{stats.pending}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Pending</p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
-                  onClick={() => setActiveTab('applications')}
-                >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">✅</div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-green-400 mb-1">{stats.approved}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Approved</p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
-                  onClick={() => setActiveTab('applications')}
-                >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">❌</div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-red-400 mb-1">{stats.rejected}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Rejected</p>
+                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold gradient-text mb-3 sm:mb-4 md:mb-6">AIDP Program Overview</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 w-full">
+                    <div>
+                      <h4 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-white mb-2 sm:mb-3">Program Purpose</h4>
+                      <p className="text-gray-300 leading-relaxed text-xs sm:text-sm md:text-base">
+                        AIDP helps the poor, retired, disabled, separated, and many more. In conjunction with the Private Grant Foundation, we issue billions of dollars in grants to individuals every day.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-white mb-2 sm:mb-3">Grant Benefits</h4>
+                      <ul className="text-gray-300 space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base">
+                        <li>• No repayment required</li>
+                        <li>• Not taxable income</li>
+                        <li>• No credit check needed</li>
+                        <li>• Processing fee required</li>
+                        <li>• Worldwide program</li>
+                      </ul>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
+            )}
 
-              {/* Additional Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+            {activeTab === 'applications' && <ApplicationsList onStatsUpdate={refreshStats} />}
+            {activeTab === 'messages' && <MessagingPanel onUnreadCountChange={handleUnreadCountChange} />}
+            {activeTab === 'settings' && (
+              <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full">
+                <ChangePassword />
+                <AgentImageUpload />
+                
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center"
+                  className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 w-full"
                 >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">📅</div>
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-coral-400 mb-1">{stats.todayApplications || 0}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Today</p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center"
-                >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">📈</div>
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-blue-400 mb-1">{stats.thisWeekApplications || 0}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">This Week</p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center"
-                >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">💰</div>
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-green-400 mb-1">{stats.totalGrantsAwarded || '$0'}</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Awarded</p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  className="glass-effect rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
-                  onClick={() => setActiveTab('messages')}
-                >
-                  <div className="text-2xl sm:text-3xl md:text-4xl mb-2">💬</div>
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-purple-400 mb-1">Active</h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">Messages</p>
+                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-3 sm:mb-4 md:mb-6">⚙️ System Settings</h3>
+                  <div className="space-y-3 sm:space-y-4 md:space-y-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-xs sm:text-sm md:text-base">Auto-approve applications</span>
+                      <button className="bg-gray-600 rounded-full w-12 h-6 relative flex-shrink-0">
+                        <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-xs sm:text-sm md:text-base">Email notifications</span>
+                      <button className="bg-coral-500 rounded-full w-12 h-6 relative flex-shrink-0">
+                        <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-xs sm:text-sm md:text-base">SMS notifications</span>
+                      <button className="bg-coral-500 rounded-full w-12 h-6 relative flex-shrink-0">
+                        <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
+                      </button>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
-
-              {/* Program Info */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
-                className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8"
-              >
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold gradient-text mb-4 sm:mb-6">AIDP Program Overview</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-2 sm:mb-3">Program Purpose</h4>
-                    <p className="text-gray-300 leading-relaxed text-xs sm:text-sm md:text-base">
-                      AIDP helps the poor, retired, disabled, separated, and many more. In conjunction with the Private Grant Foundation, we issue billions of dollars in grants to individuals every day.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-2 sm:mb-3">Grant Benefits</h4>
-                    <ul className="text-gray-300 space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base">
-                      <li>• No repayment required</li>
-                      <li>• Not taxable income</li>
-                      <li>• No credit check needed</li>
-                      <li>• Processing fee required</li>
-                      <li>• Worldwide program</li>
-                    </ul>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          )}
-
-          {activeTab === 'applications' && <ApplicationsList onStatsUpdate={refreshStats} />}
-          {activeTab === 'messages' && <MessagingPanel onUnreadCountChange={handleUnreadCountChange} />}
-          {activeTab === 'settings' && (
-            <div className="space-y-4 sm:space-y-6">
-              <ChangePassword />
-              <AgentImageUpload />
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-effect rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8"
-              >
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6">⚙️ System Settings</h3>
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300 text-sm sm:text-base">Auto-approve applications</span>
-                    <button className="bg-gray-600 rounded-full w-12 h-6 relative flex-shrink-0">
-                      <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300 text-sm sm:text-base">Email notifications</span>
-                    <button className="bg-coral-500 rounded-full w-12 h-6 relative flex-shrink-0">
-                      <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300 text-sm sm:text-base">SMS notifications</span>
-                    <button className="bg-coral-500 rounded-full w-12 h-6 relative flex-shrink-0">
-                      <div className="bg-white w-5 h-5 rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </motion.div>
+            )}
+          </motion.div>
+        </div>
       </div>
     </div>
   )
