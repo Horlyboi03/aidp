@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import ApplicationsList from './ApplicationsList'
 import MessagingPanel from './MessagingPanel'
 import AgentImageUpload from './AgentImageUpload'
@@ -32,8 +33,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   })
   const [refreshKey, setRefreshKey] = useState(0)
   const [agentImage, setAgentImage] = useState<string | null>(null)
-
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0)
+  const [newApplicationsCount, setNewApplicationsCount] = useState(0)
+  const [lastApplicationsCount, setLastApplicationsCount] = useState(0)
 
   const handleUnreadCountChange = (count: number) => {
     setUnreadMessagesCount(count)
@@ -43,7 +45,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setRefreshKey(prev => prev + 1)
   }
 
-  // Load unread messages count
+  // Load unread messages count and check for new applications
   useEffect(() => {
     const loadUnreadCount = async () => {
       try {
@@ -59,9 +61,42 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
 
     loadUnreadCount()
-    const interval = setInterval(loadUnreadCount, 5000) // Check every 5 seconds
+    const interval = setInterval(loadUnreadCount, 3000) // Check every 3 seconds
     return () => clearInterval(interval)
   }, [])
+
+  // Check for new applications
+  useEffect(() => {
+    const checkNewApplications = async () => {
+      try {
+        const response = await fetch('/api/applications')
+        if (response.ok) {
+          const data = await response.json()
+          const currentCount = data.applications?.length || 0
+          
+          if (lastApplicationsCount > 0 && currentCount > lastApplicationsCount) {
+            const newCount = currentCount - lastApplicationsCount
+            setNewApplicationsCount(newCount)
+            // Show notification
+            toast.success(`🎉 ${newCount} new application${newCount > 1 ? 's' : ''} received!`, {
+              duration: 5000,
+              icon: '📋'
+            })
+            // Auto-switch to applications tab if there are new applications
+            setActiveTab('applications')
+          }
+          
+          setLastApplicationsCount(currentCount)
+        }
+      } catch (error) {
+        console.error('Failed to check applications:', error)
+      }
+    }
+
+    checkNewApplications()
+    const interval = setInterval(checkNewApplications, 3000) // Check every 3 seconds
+    return () => clearInterval(interval)
+  }, [lastApplicationsCount])
 
   // Load agent image
   useEffect(() => {
@@ -181,7 +216,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'applications', label: 'Applications', icon: '📋', badge: stats.pending },
+    { id: 'applications', label: 'Applications', icon: '📋', badge: newApplicationsCount > 0 ? newApplicationsCount : stats.pending },
     { id: 'messages', label: 'Messages', icon: '💬', badge: unreadMessagesCount },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ]
