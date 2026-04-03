@@ -242,11 +242,11 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   }
 
   return (
-    <div className="glass-effect rounded-2xl overflow-hidden h-[700px] flex">
-      {/* Conversations List */}
-      <div className="w-1/3 border-r border-white/20 p-4 flex flex-col">
+    <div className="glass-effect rounded-2xl overflow-hidden h-[600px] sm:h-[700px] flex flex-col md:flex-row">
+      {/* Conversations List - Responsive */}
+      <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} md:flex w-full md:w-1/3 border-r border-white/20 p-2 sm:p-4 flex-col`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-white">Live Chat</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-white">Live Chat</h3>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-xs text-gray-400">Real-time</span>
@@ -268,7 +268,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   setSelectedConversation(conv)
                   markAsRead(conv.id)
                 }}
-                className={`p-3 rounded-lg cursor-pointer transition-all ${
+                className={`p-2 sm:p-3 rounded-lg cursor-pointer transition-all ${
                   selectedConversation?.id === conv.id
                     ? 'bg-coral-500/20 border border-coral-400'
                     : 'hover:bg-white/10'
@@ -276,13 +276,13 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 whileHover={{ scale: 1.02 }}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <h4 className="text-white font-medium flex items-center">
+                  <h4 className="text-white font-medium text-sm sm:text-base flex items-center truncate">
                     {conv.applicantName}
                     {conv.unreadCount > 0 && (
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="ml-2 w-2 h-2 bg-coral-400 rounded-full"
+                        className="ml-2 w-2 h-2 bg-coral-400 rounded-full flex-shrink-0"
                       />
                     )}
                   </h4>
@@ -290,13 +290,13 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="bg-coral-500 text-white text-xs px-2 py-1 rounded-full"
+                      className="bg-coral-500 text-white text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0"
                     >
                       {conv.unreadCount}
                     </motion.span>
                   )}
                 </div>
-                <p className="text-gray-400 text-sm truncate">{conv.lastMessage}</p>
+                <p className="text-gray-400 text-xs sm:text-sm truncate">{conv.lastMessage}</p>
                 <p className="text-gray-500 text-xs mt-1">
                   {new Date(conv.messages[conv.messages.length - 1]?.timestamp || Date.now()).toLocaleString()}
                 </p>
@@ -306,19 +306,25 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
         )}
       </div>
 
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      {/* Chat Area - Responsive */}
+      <div className="flex-1 flex flex-col w-full">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-white/20">
-              <h3 className="text-xl font-bold text-white">
+            <div className="p-2 sm:p-4 border-b border-white/20 flex justify-between items-center">
+              <h3 className="text-lg sm:text-xl font-bold text-white truncate">
                 {selectedConversation.applicantName}
               </h3>
+              <button
+                onClick={() => setSelectedConversation(null)}
+                className="md:hidden text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3" style={{ maxHeight: 'calc(100% - 120px)' }}>
+            {/* Messages - Responsive */}
+            <div className="flex-1 p-2 sm:p-4 overflow-y-auto space-y-3" style={{ maxHeight: 'calc(100% - 120px)' }}>
               {selectedConversation.messages.map((message) => (
                 <motion.div
                   key={message.id}
@@ -327,21 +333,21 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs px-4 py-2 rounded-lg ${
+                    className={`max-w-[85%] sm:max-w-xs px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm ${
                       message.isAdmin
                         ? 'bg-coral-gradient text-white'
                         : 'glass-effect text-gray-200'
                     }`}
                   >
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-xs">
+                      <span className="font-semibold text-xs truncate">
                         {message.isAdmin ? 'Mary George' : message.sender}
                       </span>
-                      <span className="text-xs opacity-70">
-                        {new Date(message.timestamp).toLocaleTimeString()}
+                      <span className="text-xs opacity-70 whitespace-nowrap">
+                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <p className="text-sm">{message.message}</p>
+                    <p className="break-words">{message.message}</p>
                     
                     {/* Message Status for Admin Messages */}
                     {message.isAdmin && (
@@ -358,20 +364,20 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
               ))}
             </div>
 
-            {/* Message Input */}
-            <div className="p-4 border-t border-white/20">
+            {/* Message Input - Responsive */}
+            <div className="p-2 sm:p-4 border-t border-white/20">
               <div className="flex space-x-2">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="Type your message..."
-                  className="flex-1 form-input px-4 py-2 rounded-lg text-sm"
+                  placeholder="Type message..."
+                  className="flex-1 form-input px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm"
                 />
                 <motion.button
                   onClick={sendMessage}
-                  className="btn-coral px-6 py-2 rounded-lg text-sm font-semibold"
+                  className="btn-coral px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -384,7 +390,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="text-6xl mb-4">💬</div>
-              <p className="text-gray-400">Select a conversation to start messaging</p>
+              <p className="text-gray-400 text-sm sm:text-base">Select a conversation to start messaging</p>
             </div>
           </div>
         )}
