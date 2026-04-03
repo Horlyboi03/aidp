@@ -258,14 +258,15 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
                 {errors.maritalStatus && <p className="text-red-400 text-sm mt-1">{errors.maritalStatus.message}</p>}
               </div>
 
-            <div>
-              <label className="block text-white font-semibold mb-2">Occupation *</label>
-              <input
-                {...register('occupation', { required: 'Occupation is required' })}
-                className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
-                placeholder="Enter your occupation"
-              />
-              {errors.occupation && <p className="text-red-400 text-sm mt-1">{errors.occupation.message}</p>}
+              <div>
+                <label className="block text-white font-semibold mb-2">Occupation *</label>
+                <input
+                  {...register('occupation', { required: 'Occupation is required' })}
+                  className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400"
+                  placeholder="Enter your occupation"
+                />
+                {errors.occupation && <p className="text-red-400 text-sm mt-1">{errors.occupation.message}</p>}
+              </div>
             </div>
 
             <div>

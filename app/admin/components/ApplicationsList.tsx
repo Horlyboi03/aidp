@@ -362,6 +362,11 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                   <label className="text-gray-700 text-sm font-semibold">Marital Status</label>
                   <p className="text-gray-900 font-medium capitalize">{(selectedApp as any).maritalStatus || 'Not specified'}</p>
                 </div>
+                <div>
+                  <label className="text-gray-700 text-sm font-semibold">Occupation</label>
+                  <p className="text-gray-900 font-medium">{(selectedApp as any).occupation || 'Not provided'}</p>
+                </div>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
