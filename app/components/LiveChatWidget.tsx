@@ -347,7 +347,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
         )}
       </motion.button>
 
-      {/* Chat Window - Beautiful White Background */}
+      {/* Chat Window - Beautiful White Background - Responsive */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -355,32 +355,32 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-20 md:bottom-24 right-4 md:right-6 z-40 w-[calc(100vw-2rem)] md:w-96 h-[500px] bg-white/98 backdrop-blur-xl rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-gray-200"
+            className="fixed bottom-20 md:bottom-24 right-2 md:right-6 z-40 w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-96 h-[500px] sm:h-[550px] bg-white/98 backdrop-blur-xl rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-gray-200"
           >
             {/* Chat Header */}
-            <div className="bg-coral-gradient p-4 text-white flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold">Chat with Mary George</h3>
-                <p className="text-sm opacity-90 flex items-center">
-                  <span className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-400' : 'bg-gray-400'}`}></span>
-                  {isConnected ? 'Connected' : 'Connecting...'}
+            <div className="bg-coral-gradient p-3 sm:p-4 text-white flex justify-between items-center flex-shrink-0">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm sm:text-base truncate">Chat with Mary George</h3>
+                <p className="text-xs sm:text-sm opacity-90 flex items-center">
+                  <span className={`w-2 h-2 rounded-full mr-2 flex-shrink-0 ${isConnected ? 'bg-green-400' : 'bg-gray-400'}`}></span>
+                  <span className="truncate">{isConnected ? 'Connected' : 'Connecting...'}</span>
                 </p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white hover:text-gray-200 text-2xl"
+                className="text-white hover:text-gray-200 text-2xl ml-2 flex-shrink-0"
               >
                 ×
               </button>
             </div>
 
             {/* Messages - White Background */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-white">
+            <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-white">
               {messages.length === 0 && (
                 <div className="text-center text-gray-500 py-8">
                   <div className="text-4xl mb-2">👋</div>
-                  <p className="font-medium">Start a conversation with Mary George!</p>
-                  <p className="text-sm mt-2">She'll respond as soon as possible.</p>
+                  <p className="font-medium text-sm sm:text-base">Start a conversation with Mary George!</p>
+                  <p className="text-xs sm:text-sm mt-2">She'll respond as soon as possible.</p>
                 </div>
               )}
               
@@ -392,21 +392,21 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs px-3 py-2 rounded-lg text-sm shadow-md ${
+                    className={`max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-xs sm:text-sm shadow-md ${
                       message.sender === 'user'
                         ? 'bg-coral-gradient text-white'
                         : 'bg-white text-gray-800 border border-gray-200'
                     }`}
                   >
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className={`font-semibold text-xs ${message.sender === 'user' ? 'text-white' : 'text-coral-600'}`}>
+                      <span className={`font-semibold text-xs ${message.sender === 'user' ? 'text-white' : 'text-coral-600'} truncate`}>
                         {message.senderName}
                       </span>
-                      <span className={`text-xs ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
-                        {message.timestamp.toLocaleTimeString()}
+                      <span className={`text-xs whitespace-nowrap ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <p>{message.text}</p>
+                    <p className="break-words">{message.text}</p>
                     
                     {/* Message Status for User Messages */}
                     {message.sender === 'user' && (
@@ -425,28 +425,28 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
             </div>
 
             {/* Input - White Background */}
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex space-x-2">
+            <div className="p-3 sm:p-4 border-t border-gray-200 bg-white flex-shrink-0">
+              <div className="flex space-x-2 mb-2">
                 <input
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type your message to Mary..."
-                  className="flex-1 px-3 py-2 rounded-lg text-sm border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
+                  placeholder="Type message..."
+                  className="flex-1 px-3 py-2 rounded-lg text-xs sm:text-sm border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                 />
                 <motion.button
                   onClick={sendMessage}
                   disabled={!inputText.trim()}
-                  className="btn-coral px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-coral px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Send
                 </motion.button>
               </div>
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                Messages are sent directly to Mary George (maryygeorge193@gmail.com)
+              <p className="text-xs text-gray-500 text-center">
+                Direct message to Mary George
               </p>
             </div>
           </motion.div>
