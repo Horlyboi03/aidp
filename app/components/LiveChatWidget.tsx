@@ -241,7 +241,20 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
 
       if (response.ok) {
         console.log('Message sent successfully')
-        toast.success('Message sent to Mary George!')
+        toast.success('✅ Message sent to Mary George!', {
+          duration: 4000,
+          style: {
+            background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)',
+            color: '#fff',
+            border: '2px solid #fff',
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 8px 24px rgba(255, 107, 107, 0.4)',
+          },
+          icon: '✅',
+        })
       } else {
         console.error('Server error:', responseData)
         const errorMsg = responseData.error || responseData.message || 'Failed to send message'
