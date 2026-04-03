@@ -222,16 +222,16 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   ]
 
   return (
-    <div className="min-h-screen p-2 md:p-6">
+    <div className="min-h-screen p-2 sm:p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header - Responsive */}
+        {/* Header - Fully Responsive */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-effect rounded-2xl p-4 md:p-6 mb-4 md:mb-8"
+          className="glass-effect rounded-2xl p-3 sm:p-4 md:p-6 mb-3 sm:mb-4 md:mb-8"
         >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-3 md:space-x-6 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-6 w-full sm:w-auto">
               {/* AIDP Logo - Responsive */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -241,7 +241,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 <img
                   src="/images/aidp-logo-white.svg"
                   alt="AIDP Grant Program"
-                  className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 drop-shadow-2xl hover:scale-110 transition-transform duration-300"
+                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 drop-shadow-2xl hover:scale-110 transition-transform duration-300"
                   onError={(e) => {
                     console.error('Logo failed to load, trying fallback')
                     e.currentTarget.src = "/images/aidp-logo.svg"
@@ -250,15 +250,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 />
               </motion.div>
               
-              <div className="flex-1">
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold gradient-text">AIDP Admin Dashboard</h1>
-                <p className="text-gray-300 mt-1 text-xs md:text-sm">Manage grant applications and communications</p>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold gradient-text truncate">AIDP Admin Dashboard</h1>
+                <p className="text-gray-300 mt-1 text-xs sm:text-sm truncate">Manage applications & communications</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4 w-full md:w-auto justify-end">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-end">
               <motion.button
                 onClick={handleLogout}
-                className="px-4 md:px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm md:text-base"
+                className="px-3 sm:px-4 md:px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs sm:text-sm md:text-base"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -268,19 +268,19 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           </div>
         </motion.div>
 
-        {/* Navigation Tabs - Responsive with Horizontal Scroll */}
+        {/* Navigation Tabs - Fully Responsive with Horizontal Scroll */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="glass-effect rounded-2xl p-2 mb-8 overflow-x-auto"
+          className="glass-effect rounded-2xl p-1 sm:p-2 mb-6 sm:mb-8 overflow-x-auto"
         >
-          <div className="flex space-x-2 min-w-max md:min-w-0">
+          <div className="flex space-x-1 sm:space-x-2 min-w-max md:min-w-0">
             {tabs.map((tab) => (
               <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center space-x-2 px-4 md:px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                className={`relative flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all whitespace-nowrap text-xs sm:text-sm md:text-base ${
                   activeTab === tab.id
                     ? 'btn-coral text-white'
                     : 'text-gray-300 hover:text-white hover:bg-white/10'
@@ -289,7 +289,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 whileTap={{ scale: 0.98 }}
               >
                 <span>{tab.icon}</span>
-                <span className="text-sm md:text-base">{tab.label}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
                 {tab.badge && tab.badge > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {tab.badge}
@@ -309,17 +309,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         >
           {activeTab === 'overview' && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="glass-effect rounded-2xl p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-4xl mb-2">📊</div>
-                  <h3 className="text-2xl font-bold text-white mb-1">{stats.total}</h3>
-                  <p className="text-gray-300">Total Applications</p>
+                  <div className="text-3xl sm:text-4xl mb-2">📊</div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">{stats.total}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Total Applications</p>
                   <p className="text-xs text-coral-400 mt-2">Click to view all</p>
                 </motion.div>
 
@@ -327,12 +327,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="glass-effect rounded-2xl p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-4xl mb-2">⏳</div>
-                  <h3 className="text-2xl font-bold text-yellow-400 mb-1">{stats.pending}</h3>
-                  <p className="text-gray-300">Pending Review</p>
+                  <div className="text-3xl sm:text-4xl mb-2">⏳</div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-yellow-400 mb-1">{stats.pending}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Pending Review</p>
                   <p className="text-xs text-coral-400 mt-2">Click to manage</p>
                 </motion.div>
 
@@ -340,12 +340,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="glass-effect rounded-2xl p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-4xl mb-2">✅</div>
-                  <h3 className="text-2xl font-bold text-green-400 mb-1">{stats.approved}</h3>
-                  <p className="text-gray-300">Approved</p>
+                  <div className="text-3xl sm:text-4xl mb-2">✅</div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-green-400 mb-1">{stats.approved}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Approved</p>
                   <p className="text-xs text-coral-400 mt-2">Click to view</p>
                 </motion.div>
 
@@ -353,18 +353,18 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="glass-effect rounded-2xl p-6 text-center cursor-pointer hover:scale-105 transition-transform"
+                  className="glass-effect rounded-2xl p-4 sm:p-6 text-center cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => setActiveTab('applications')}
                 >
-                  <div className="text-4xl mb-2">❌</div>
-                  <h3 className="text-2xl font-bold text-red-400 mb-1">{stats.rejected}</h3>
-                  <p className="text-gray-300">Rejected</p>
+                  <div className="text-3xl sm:text-4xl mb-2">❌</div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-red-400 mb-1">{stats.rejected}</h3>
+                  <p className="text-gray-300 text-xs sm:text-sm">Rejected</p>
                   <p className="text-xs text-coral-400 mt-2">Click to view</p>
                 </motion.div>
               </div>
 
               {/* Additional Statistics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -417,21 +417,21 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 }}
-                className="glass-effect rounded-2xl p-8"
+                className="glass-effect rounded-2xl p-4 sm:p-6 md:p-8"
               >
-                <h3 className="text-2xl font-bold gradient-text mb-6">AIDP Program Overview</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <h3 className="text-xl sm:text-2xl font-bold gradient-text mb-4 sm:mb-6">AIDP Program Overview</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                   <div>
-                    <h4 className="text-lg font-semibold text-white mb-3">Program Purpose</h4>
-                    <p className="text-gray-300 leading-relaxed">
+                    <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Program Purpose</h4>
+                    <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
                       AIDP helps the poor, retired, disabled, separated, and many more. In conjunction 
                       with the Private Grant Foundation, we issue billions of dollars in grants to 
                       individuals every day.
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-white mb-3">Grant Benefits</h4>
-                    <ul className="text-gray-300 space-y-2">
+                    <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Grant Benefits</h4>
+                    <ul className="text-gray-300 space-y-2 text-sm sm:text-base">
                       <li>• No repayment required</li>
                       <li>• Not taxable income</li>
                       <li>• No credit check needed</li>
