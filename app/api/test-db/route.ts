@@ -21,6 +21,17 @@ export async function GET() {
     } catch (alterError) {
       console.log('Note: Could not alter users table (columns may already exist):', alterError)
     }
+
+    // Add gender column to applications if it doesn't exist
+    try {
+      await sql`
+        ALTER TABLE applications 
+        ADD COLUMN IF NOT EXISTS gender TEXT
+      `
+      console.log('✅ Gender column added/verified')
+    } catch (alterError) {
+      console.log('Note: Could not alter applications table (column may already exist):', alterError)
+    }
     
     // Check if tables exist
     const tables = await sql`
