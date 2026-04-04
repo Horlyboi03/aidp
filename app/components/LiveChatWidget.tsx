@@ -478,16 +478,18 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
             </div>
 
             {/* Messages - White Background */}
-            <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-white">
-              {messages.length === 0 && (
-                <div className="text-center text-gray-500 py-8">
-                  <div className="text-4xl mb-2">👋</div>
-                  <p className="font-medium text-sm sm:text-base">Start a conversation with Mary George!</p>
-                  <p className="text-xs sm:text-sm mt-2">She'll respond as soon as possible.</p>
+            <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-white flex flex-col">
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-500 py-8 flex items-center justify-center h-full">
+                  <div>
+                    <div className="text-4xl mb-2">👋</div>
+                    <p className="font-medium text-sm sm:text-base">Start a conversation with Mary George!</p>
+                    <p className="text-xs sm:text-sm mt-2">She'll respond as soon as possible.</p>
+                  </div>
                 </div>
-              )}
-              
-              {messages.map((message) => (
+              ) : (
+                <>
+                  {messages.map((message) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -538,6 +540,8 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                 </motion.div>
               ))}
               <div ref={messagesEndRef} />
+                </>
+              )}
             </div>
 
             {/* Input - White Background */}

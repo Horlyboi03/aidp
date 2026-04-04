@@ -37,6 +37,15 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [selectedConversation?.messages])
 
   // Load real conversations from API
   const loadConversations = async () => {
@@ -49,15 +58,13 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           
           // Play notification sound if there are new messages
           if (lastMessageCount > 0 && totalMessages > lastMessageCount) {
-            // Simple notification sound (you can replace with actual audio file)
             const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT')
             audio.volume = 0.3
-            audio.play().catch(() => {}) // Ignore errors if audio can't play
+            audio.play().catch(() => {})
           }
           
           setConversations(data.conversations)
           setLastMessageCount(totalMessages)
-          console.log('Loaded conversations:', data.conversations.length)
           
           // Notify parent about unread count
           const totalUnread = data.conversations.reduce((sum: number, conv: Conversation) => sum + conv.unreadCount, 0)
@@ -76,8 +83,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
 
   useEffect(() => {
     loadConversations()
-    
-    // Poll for new messages every 10 seconds
     const interval = setInterval(loadConversations, 10000)
     return () => clearInterval(interval)
   }, [])
@@ -88,7 +93,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
     const messageText = newMessage || '📷 Image'
     setNewMessage('')
 
-    // Create temporary message for immediate UI update
     const tempMessage: Message = {
       id: `temp-${Date.now()}`,
       sender: 'Admin',
@@ -100,7 +104,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
       read: false
     }
 
-    // Update local state immediately for better UX
     setConversations(prev =>
       prev.map(conv =>
         conv.id === selectedConversation.id
@@ -123,7 +126,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
     )
 
     try {
-      // Send to API
       const response = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,11 +142,9 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
 
       if (response.ok) {
         const result = await response.json()
-        console.log('Admin message sent successfully:', result)
         setSelectedImage(null)
         setImageFile(null)
         
-        // Update with real message from server
         if (result.conversation) {
           setConversations(prev =>
             prev.map(conv =>
@@ -168,8 +168,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           )
         }
       } else {
-        console.error('Failed to send admin message')
-        // Revert the optimistic update on failure
         setConversations(prev =>
           prev.map(conv =>
             conv.id === selectedConversation.id
@@ -183,7 +181,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
       }
     } catch (error) {
       console.error('Failed to send admin message:', error)
-      // Revert the optimistic update on failure
       setConversations(prev =>
         prev.map(conv =>
           conv.id === selectedConversation.id
@@ -199,7 +196,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
 
   const markAsRead = async (conversationId: string) => {
     try {
-      // Mark as read on server
       const response = await fetch('/api/messages', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -210,7 +206,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
       })
 
       if (response.ok) {
-        // Update local state immediately
         setConversations(prev =>
           prev.map(conv =>
             conv.id === conversationId 
@@ -223,7 +218,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           )
         )
 
-        // Update selected conversation if it's the one being marked as read
         if (selectedConversation && selectedConversation.id === conversationId) {
           setSelectedConversation(prev => 
             prev ? {
@@ -234,10 +228,8 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           )
         }
 
-        // Refresh conversations to get updated counts
         setTimeout(() => {
           loadConversations()
-          // Also immediately notify parent of the change
           if (onUnreadCountChange) {
             const newTotalUnread = conversations.reduce((sum, conv) => 
               conv.id === conversationId ? sum : sum + conv.unreadCount, 0
@@ -252,25 +244,25 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   }
 
   return (
-    <div className="glass-effect rounded-2xl overflow-hidden h-[600px] sm:h-[700px] flex flex-col md:flex-row">
+    <div className="w-full h-auto md:h-[600px] lg:h-[700px] flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-0">
       {/* Conversations List - Responsive */}
-      <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} md:flex w-full md:w-1/3 border-r border-white/20 p-2 sm:p-4 flex-col`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg sm:text-xl font-bold text-white">Live Chat</h3>
-          <div className="flex items-center space-x-2">
+      <div className={`w-full md:w-1/3 ${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col glass-effect rounded-lg sm:rounded-xl md:rounded-l-xl md:rounded-r-none p-2 sm:p-3 md:p-4 border-b md:border-b-0 md:border-r border-white/20`}>
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h3 className="text-base sm:text-lg md:text-xl font-bold text-white">Live Chat</h3>
+          <div className="flex items-center gap-1 sm:gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-xs text-gray-400">Real-time</span>
           </div>
         </div>
         
         {conversations.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-2">💬</div>
-            <p className="text-gray-400 text-sm">No conversations yet</p>
+          <div className="text-center py-6 sm:py-8">
+            <div className="text-3xl sm:text-4xl mb-2">💬</div>
+            <p className="text-gray-400 text-xs sm:text-sm">No conversations yet</p>
             <p className="text-gray-500 text-xs mt-1">Users will appear here when they start chatting</p>
           </div>
         ) : (
-          <div className="space-y-2 flex-1 overflow-y-auto">
+          <div className="space-y-1 sm:space-y-2 flex-1 overflow-y-auto">
             {conversations.map((conv) => (
               <motion.div
                 key={conv.id}
@@ -285,8 +277,8 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 }`}
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="flex justify-between items-start mb-1">
-                  <h4 className="text-white font-medium text-sm sm:text-base flex items-center truncate">
+                <div className="flex justify-between items-start gap-2 mb-1">
+                  <h4 className="text-white font-medium text-xs sm:text-sm md:text-base flex items-center truncate flex-1">
                     {conv.applicantName}
                     {conv.unreadCount > 0 && (
                       <motion.span
@@ -300,13 +292,13 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="bg-coral-500 text-white text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0"
+                      className="bg-coral-500 text-white text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                     >
                       {conv.unreadCount}
                     </motion.span>
                   )}
                 </div>
-                <p className="text-gray-400 text-xs sm:text-sm truncate">{conv.lastMessage}</p>
+                <p className="text-gray-400 text-xs truncate">{conv.lastMessage}</p>
                 <p className="text-gray-500 text-xs mt-1">
                   {new Date(conv.messages[conv.messages.length - 1]?.timestamp || Date.now()).toLocaleString()}
                 </p>
@@ -317,106 +309,113 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
       </div>
 
       {/* Chat Area - Responsive */}
-      <div className="flex-1 flex flex-col w-full">
+      <div className="w-full md:w-2/3 flex flex-col glass-effect rounded-lg sm:rounded-xl md:rounded-r-xl md:rounded-l-none overflow-hidden">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-2 sm:p-4 border-b border-white/20 flex justify-between items-center">
-              <h3 className="text-lg sm:text-xl font-bold text-white truncate">
+            <div className="p-2 sm:p-3 md:p-4 border-b border-white/20 flex justify-between items-center bg-gradient-to-r from-coral-500/10 to-transparent">
+              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white truncate flex-1">
                 {selectedConversation.applicantName}
               </h3>
               <button
                 onClick={() => setSelectedConversation(null)}
-                className="md:hidden text-gray-400 hover:text-white text-2xl"
+                className="md:hidden text-gray-400 hover:text-white text-xl ml-2 flex-shrink-0"
               >
                 ×
               </button>
             </div>
 
             {/* Messages - Responsive */}
-            <div className="flex-1 p-2 sm:p-4 overflow-y-auto space-y-3" style={{ maxHeight: 'calc(100% - 120px)' }}>
-              {selectedConversation.messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[85%] sm:max-w-xs px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm ${
-                      message.isAdmin
-                        ? 'bg-coral-gradient text-white'
-                        : 'glass-effect text-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-xs truncate">
-                        {message.isAdmin ? 'Mary George' : message.sender}
-                      </span>
-                      <span className="text-xs opacity-70 whitespace-nowrap">
-                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    {message.message.includes('📷') ? (
-                      <div className="mt-2">
-                        <p className="text-xs mb-2">{message.message}</p>
-                        {(message.imageData || message.imagedata) && (
-                          <img 
-                            src={message.imageData || message.imagedata} 
-                            alt="Chat image" 
-                            className="max-w-full rounded-lg max-h-64 object-cover"
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <p className="break-words">{message.message}</p>
-                    )}
-                    
-                    {/* Message Status for Admin Messages */}
-                    {message.isAdmin && (
-                      <div className="flex justify-end mt-1">
-                        {message.delivered && (
-                          <span className={`text-xs ${message.read ? 'text-blue-300' : 'text-gray-300'}`}>
-                            {message.read ? '✓✓' : '✓'}
+            <div className="flex-1 p-2 sm:p-3 md:p-4 overflow-y-auto space-y-2 sm:space-y-3 min-h-0">
+              {selectedConversation.messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-400 text-xs sm:text-sm">No messages yet. Start the conversation!</p>
+                </div>
+              ) : (
+                <>
+                  {selectedConversation.messages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[90%] sm:max-w-[80%] md:max-w-xs px-2 sm:px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm ${
+                          message.isAdmin
+                            ? 'bg-coral-gradient text-white'
+                            : 'glass-effect text-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                          <span className="font-semibold text-xs truncate">
+                            {message.isAdmin ? 'Mary George' : message.sender}
                           </span>
+                          <span className="text-xs opacity-70 whitespace-nowrap flex-shrink-0">
+                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        {message.message.includes('📷') ? (
+                          <div className="mt-2">
+                            <p className="text-xs mb-2">{message.message}</p>
+                            {(message.imageData || message.imagedata) && (
+                              <img 
+                                src={message.imageData || message.imagedata} 
+                                alt="Chat image" 
+                                className="max-w-full rounded-lg max-h-48 sm:max-h-56 md:max-h-64 object-cover"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <p className="break-words">{message.message}</p>
+                        )}
+                        
+                        {message.isAdmin && (
+                          <div className="flex justify-end mt-1">
+                            {message.delivered && (
+                              <span className={`text-xs ${message.read ? 'text-blue-300' : 'text-gray-300'}`}>
+                                {message.read ? '✓✓' : '✓'}
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
+                    </motion.div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </>
+              )}
             </div>
 
             {/* Message Input - Responsive */}
-            <div className="p-2 sm:p-4 border-t border-white/20">
-              {/* Image Preview */}
+            <div className="p-2 sm:p-3 md:p-4 border-t border-white/20 bg-gradient-to-t from-black/20 to-transparent flex-shrink-0">
               {selectedImage && (
-                <div className="mb-3 relative">
+                <div className="mb-2 sm:mb-3 relative inline-block">
                   <img 
                     src={selectedImage} 
                     alt="Preview" 
-                    className="max-w-full max-h-32 rounded-lg object-cover"
+                    className="max-w-full max-h-24 sm:max-h-28 md:max-h-32 rounded-lg object-cover"
                   />
                   <button
                     onClick={() => {
                       setSelectedImage(null)
                       setImageFile(null)
                     }}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm hover:bg-red-600"
                   >
                     ×
                   </button>
                 </div>
               )}
               
-              <div className="flex space-x-2">
+              <div className="flex gap-1 sm:gap-2">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                   placeholder="Type message..."
-                  className="flex-1 form-input px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm"
+                  className="flex-1 form-input px-2 sm:px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm"
                 />
                 <input
                   ref={fileInputRef}
@@ -456,7 +455,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 <motion.button
                   onClick={sendMessage}
                   disabled={!newMessage.trim() && !selectedImage}
-                  className="btn-coral px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-coral px-2 sm:px-4 md:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -466,10 +465,10 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center p-4">
             <div className="text-center">
-              <div className="text-6xl mb-4">💬</div>
-              <p className="text-gray-400 text-sm sm:text-base">Select a conversation to start messaging</p>
+              <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">💬</div>
+              <p className="text-gray-400 text-xs sm:text-sm md:text-base">Select a conversation to start messaging</p>
             </div>
           </div>
         )}
