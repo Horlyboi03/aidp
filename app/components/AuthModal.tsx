@@ -57,7 +57,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Account created successfully! Please sign in.')
+        toast.success('Account created successfully! Please sign in.', {
+          duration: 4000,
+          style: {
+            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            color: '#fff',
+            border: '2px solid #fff',
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
+          },
+          icon: '✅',
+        })
         setIsSignUp(false)
         signUpForm.reset()
       } else {
@@ -82,7 +95,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Signed in successfully!')
+        toast.success('Signed in successfully!', {
+          duration: 4000,
+          style: {
+            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            color: '#fff',
+            border: '2px solid #fff',
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
+          },
+          icon: '✅',
+        })
         onAuthSuccess(result.user, result.token)
         onClose()
         signInForm.reset()
@@ -108,7 +134,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Password reset instructions sent to your email!')
+        toast.success('Password reset instructions sent to your email!', {
+          duration: 4000,
+          style: {
+            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            color: '#fff',
+            border: '2px solid #fff',
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
+          },
+          icon: '✅',
+        })
         setIsForgotPassword(false)
         forgotPasswordForm.reset()
       } else {

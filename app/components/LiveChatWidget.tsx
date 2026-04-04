@@ -117,7 +117,8 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
             timestamp: new Date(msg.timestamp),
             senderName: msg.isAdmin ? 'Mary George' : senderName,
             delivered: msg.delivered || true,
-            read: msg.read || false
+            read: msg.read || false,
+            imageData: msg.imagedata || msg.imageData
           }))
           setMessages(formattedMessages)
           setIsConnected(true)
