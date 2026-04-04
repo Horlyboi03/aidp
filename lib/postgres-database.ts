@@ -66,6 +66,7 @@ export async function initializeTables() {
         conversationId TEXT NOT NULL,
         sender TEXT NOT NULL,
         message TEXT NOT NULL,
+        imagedata TEXT,
         isAdmin INTEGER DEFAULT 0,
         delivered INTEGER DEFAULT 1,
         read INTEGER DEFAULT 0,
@@ -362,12 +363,13 @@ export async function saveMessage(message: any) {
     console.log('saveMessage: Saving message:', message.id)
     await sql`
       INSERT INTO messages (
-        id, conversationId, sender, message, isAdmin, delivered, read, timestamp
+        id, conversationId, sender, message, imagedata, isAdmin, delivered, read, timestamp
       ) VALUES (
         ${message.id},
         ${message.conversationId},
         ${message.sender},
         ${message.message},
+        ${message.imageData || null},
         ${message.isAdmin ? 1 : 0},
         ${message.delivered ? 1 : 0},
         ${message.read ? 1 : 0},
@@ -393,6 +395,7 @@ export async function getMessagesByConversationId(conversationId: string) {
       conversationId: msg.conversationid || msg.conversationId,
       sender: msg.sender,
       message: msg.message,
+      imagedata: msg.imagedata,
       isAdmin: msg.isadmin !== undefined ? Boolean(msg.isadmin) : Boolean(msg.isAdmin),
       delivered: msg.delivered !== undefined ? Boolean(msg.delivered) : true,
       read: msg.read !== undefined ? Boolean(msg.read) : false,

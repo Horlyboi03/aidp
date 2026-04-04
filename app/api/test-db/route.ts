@@ -22,15 +22,15 @@ export async function GET() {
       console.log('Note: Could not alter users table (columns may already exist):', alterError)
     }
 
-    // Add gender column to applications if it doesn't exist
+    // Add imagedata column to messages if it doesn't exist
     try {
       await sql`
-        ALTER TABLE applications 
-        ADD COLUMN IF NOT EXISTS gender TEXT
+        ALTER TABLE messages 
+        ADD COLUMN IF NOT EXISTS imagedata TEXT
       `
-      console.log('✅ Gender column added/verified')
+      console.log('✅ Imagedata column added/verified to messages table')
     } catch (alterError) {
-      console.log('Note: Could not alter applications table (column may already exist):', alterError)
+      console.log('Note: Could not alter messages table (column may already exist):', alterError)
     }
     
     // Check if tables exist
