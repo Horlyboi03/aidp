@@ -56,13 +56,13 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const { conversationId, sender, message, isAdmin, applicantName, applicantEmail } = body
+    const { conversationId, sender, message, isAdmin, applicantName, applicantEmail, imageData } = body
     
-    // Validate required fields
-    if (!conversationId || !sender || !message) {
-      console.error('Messages POST: Missing required fields', { conversationId, sender, message })
+    // Validate required fields - either message or imageData must be present
+    if (!conversationId || !sender || (!message && !imageData)) {
+      console.error('Messages POST: Missing required fields', { conversationId, sender, message, imageData })
       return NextResponse.json(
-        { success: false, message: 'Missing required fields: conversationId, sender, and message are required' },
+        { success: false, message: 'Missing required fields: conversationId, sender, and either message or imageData are required' },
         { status: 400 }
       )
     }
@@ -132,7 +132,8 @@ export async function POST(request: NextRequest) {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       conversationId,
       sender,
-      message,
+      message: message || '',
+      imageData: imageData || null,
       timestamp: new Date().toISOString(),
       isAdmin: isAdmin || false,
       read: false,

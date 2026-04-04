@@ -1,7 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import toast from 'react-hot-toast'
 
 interface Message {
   id: string
@@ -11,6 +12,7 @@ interface Message {
   isAdmin: boolean
   delivered?: boolean
   read?: boolean
+  imageData?: string
 }
 
 interface Conversation {
@@ -31,6 +33,9 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [newMessage, setNewMessage] = useState('')
   const [lastMessageCount, setLastMessageCount] = useState(0)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Load real conversations from API
   const loadConversations = async () => {
@@ -77,9 +82,9 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   }, [])
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return
+    if (!newMessage.trim() && !selectedImage || !selectedConversation) return
 
-    const messageText = newMessage
+    const messageText = newMessage || '📷 Image'
     setNewMessage('')
 
     // Create temporary message for immediate UI update
@@ -87,6 +92,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
       id: `temp-${Date.now()}`,
       sender: 'Admin',
       message: messageText,
+      imageData: selectedImage || undefined,
       timestamp: new Date(),
       isAdmin: true,
       delivered: true,
@@ -124,6 +130,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           conversationId: selectedConversation.id,
           sender: 'Admin',
           message: messageText,
+          imageData: selectedImage || undefined,
           isAdmin: true,
           applicantName: selectedConversation.applicantName,
           applicantEmail: selectedConversation.applicantEmail || ''
@@ -133,6 +140,8 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
       if (response.ok) {
         const result = await response.json()
         console.log('Admin message sent successfully:', result)
+        setSelectedImage(null)
+        setImageFile(null)
         
         // Update with real message from server
         if (result.conversation) {
@@ -347,7 +356,20 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                         {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <p className="break-words">{message.message}</p>
+                    {message.message.includes('📷') ? (
+                      <div className="mt-2">
+                        <p className="text-xs mb-2">{message.message}</p>
+                        {message.imageData && (
+                          <img 
+                            src={message.imageData} 
+                            alt="Chat image" 
+                            className="max-w-full rounded-lg max-h-64 object-cover"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <p className="break-words">{message.message}</p>
+                    )}
                     
                     {/* Message Status for Admin Messages */}
                     {message.isAdmin && (
@@ -366,6 +388,26 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
 
             {/* Message Input - Responsive */}
             <div className="p-2 sm:p-4 border-t border-white/20">
+              {/* Image Preview */}
+              {selectedImage && (
+                <div className="mb-3 relative">
+                  <img 
+                    src={selectedImage} 
+                    alt="Preview" 
+                    className="max-w-full max-h-32 rounded-lg object-cover"
+                  />
+                  <button
+                    onClick={() => {
+                      setSelectedImage(null)
+                      setImageFile(null)
+                    }}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+              
               <div className="flex space-x-2">
                 <input
                   type="text"
@@ -375,9 +417,45 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   placeholder="Type message..."
                   className="flex-1 form-input px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm"
                 />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      if (file.size > 5 * 1024 * 1024) {
+                        toast.error('Image size must be less than 5MB')
+                        return
+                      }
+                      if (!file.type.startsWith('image/')) {
+                        toast.error('Please select a valid image file')
+                        return
+                      }
+                      const reader = new FileReader()
+                      reader.onload = (event) => {
+                        const imageData = event.target?.result as string
+                        setSelectedImage(imageData)
+                        setImageFile(file)
+                      }
+                      reader.readAsDataURL(file)
+                    }
+                  }}
+                  className="hidden"
+                />
+                <motion.button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Upload image"
+                >
+                  📷
+                </motion.button>
                 <motion.button
                   onClick={sendMessage}
-                  className="btn-coral px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
+                  disabled={!newMessage.trim() && !selectedImage}
+                  className="btn-coral px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >

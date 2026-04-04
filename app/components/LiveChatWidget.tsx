@@ -12,6 +12,7 @@ interface Message {
   senderName: string
   delivered?: boolean
   read?: boolean
+  imageData?: string
 }
 
 interface LiveChatWidgetProps {
@@ -30,7 +31,10 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
   const [inputText, setInputText] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   // Use either authenticated user or guest info
   const chatUser = user || (guestInfo ? {
@@ -160,6 +164,104 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
       }
     } catch (error) {
       console.error('Failed to check for new messages:', error)
+    }
+  }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB')
+        return
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file')
+        return
+      }
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const imageData = event.target?.result as string
+        setSelectedImage(imageData)
+        setImageFile(file)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const sendImage = async () => {
+    if (!selectedImage || !chatUser || !conversationId) return
+
+    const senderName = chatUser.fullName || (chatUser as any).fullname || chatUser.name || (chatUser as any).full_name || 'User'
+    const senderEmail = chatUser.email || (chatUser as any).user_email || ''
+
+    if (!senderName || senderName === 'User' || !senderEmail) {
+      toast.error('Unable to send image. Please sign out and sign in again.')
+      return
+    }
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: '📷 Image',
+      sender: 'user',
+      timestamp: new Date(),
+      senderName: senderName,
+      delivered: true,
+      read: false
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setSelectedImage(null)
+    setImageFile(null)
+
+    const payload = {
+      conversationId: conversationId,
+      sender: senderName,
+      message: '📷 Image',
+      imageData: selectedImage,
+      isAdmin: false,
+      applicantName: senderName,
+      applicantEmail: senderEmail
+    }
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const responseData = await response.json()
+
+      if (response.ok) {
+        toast.success('✅ Image sent to Mary George!', {
+          duration: 4000,
+          style: {
+            background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)',
+            color: '#fff',
+            border: '2px solid #fff',
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 8px 24px rgba(255, 107, 107, 0.4)',
+          },
+          icon: '📷',
+        })
+      } else {
+        throw new Error(responseData.error || 'Failed to send image')
+      }
+    } catch (error) {
+      console.error('Failed to send image:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send image. Please try again.'
+      toast.error(errorMessage)
+      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id))
     }
   }
 
@@ -406,7 +508,20 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                         {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <p className="break-words">{message.text}</p>
+                    {message.text.includes('📷') ? (
+                      <div className="mt-2">
+                        <p className="text-xs mb-2">{message.text}</p>
+                        {(message as any).imageData && (
+                          <img 
+                            src={(message as any).imageData} 
+                            alt="Chat image" 
+                            className="max-w-full rounded-lg max-h-64 object-cover"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <p className="break-words">{message.text}</p>
+                    )}
                     
                     {/* Message Status for User Messages */}
                     {message.sender === 'user' && (
@@ -426,6 +541,26 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
 
             {/* Input - White Background */}
             <div className="p-3 sm:p-4 border-t border-gray-200 bg-white flex-shrink-0">
+              {/* Image Preview */}
+              {selectedImage && (
+                <div className="mb-3 relative">
+                  <img 
+                    src={selectedImage} 
+                    alt="Preview" 
+                    className="max-w-full max-h-32 rounded-lg object-cover"
+                  />
+                  <button
+                    onClick={() => {
+                      setSelectedImage(null)
+                      setImageFile(null)
+                    }}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+              
               <div className="flex space-x-2 mb-2">
                 <input
                   type="text"
@@ -435,14 +570,30 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                   placeholder="Type message..."
                   className="flex-1 px-3 py-2 rounded-lg text-xs sm:text-sm border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                 />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
                 <motion.button
-                  onClick={sendMessage}
-                  disabled={!inputText.trim()}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Upload image"
+                >
+                  📷
+                </motion.button>
+                <motion.button
+                  onClick={selectedImage ? sendImage : sendMessage}
+                  disabled={!inputText.trim() && !selectedImage}
                   className="btn-coral px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Send
+                  {selectedImage ? 'Send' : 'Send'}
                 </motion.button>
               </div>
               <p className="text-xs text-gray-500 text-center">
