@@ -12,6 +12,7 @@ interface Message {
   isAdmin: boolean
   delivered?: boolean
   read?: boolean
+  imagedata?: string
   imageData?: string
 }
 
@@ -359,9 +360,9 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                     {message.message.includes('📷') ? (
                       <div className="mt-2">
                         <p className="text-xs mb-2">{message.message}</p>
-                        {message.imageData && (
+                        {(message.imageData || message.imagedata) && (
                           <img 
-                            src={message.imageData} 
+                            src={message.imageData || message.imagedata} 
                             alt="Chat image" 
                             className="max-w-full rounded-lg max-h-64 object-cover"
                           />

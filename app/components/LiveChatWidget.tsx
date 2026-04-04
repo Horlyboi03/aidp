@@ -512,9 +512,9 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                     {message.text.includes('📷') ? (
                       <div className="mt-2">
                         <p className="text-xs mb-2">{message.text}</p>
-                        {(message as any).imageData && (
+                        {((message as any).imageData || (message as any).imagedata) && (
                           <img 
-                            src={(message as any).imageData} 
+                            src={(message as any).imageData || (message as any).imagedata} 
                             alt="Chat image" 
                             className="max-w-full rounded-lg max-h-64 object-cover"
                           />
