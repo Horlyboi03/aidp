@@ -79,10 +79,16 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               duration: 5000,
               icon: '📋'
             })
-            setActiveTab('applications')
           }
           
           setLastApplicationsCount(currentCount)
+          setStats(prev => ({
+            ...prev,
+            total: currentCount,
+            pending: data.applications?.filter((app: any) => app.status === 'pending').length || 0,
+            approved: data.applications?.filter((app: any) => app.status === 'approved').length || 0,
+            rejected: data.applications?.filter((app: any) => app.status === 'rejected').length || 0
+          }))
         }
       } catch (error) {
         console.error('Failed to check applications:', error)
@@ -90,7 +96,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
 
     checkNewApplications()
-    const interval = setInterval(checkNewApplications, 3000)
+    const interval = setInterval(checkNewApplications, 2000)
     return () => clearInterval(interval)
   }, [lastApplicationsCount])
 

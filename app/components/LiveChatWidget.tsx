@@ -450,7 +450,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
         )}
       </motion.button>
 
-      {/* Chat Window - Beautiful White Background - Responsive */}
+      {/* Chat Window - Beautiful White Background - Fully Responsive */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -458,7 +458,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-20 md:bottom-24 right-2 md:right-6 z-40 w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-96 h-[500px] sm:h-[550px] bg-white/98 backdrop-blur-xl rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-gray-200"
+            className="fixed bottom-16 sm:bottom-20 md:bottom-24 right-1 sm:right-2 md:right-6 z-40 w-[calc(100vw-0.5rem)] sm:w-[calc(100vw-1rem)] md:w-96 h-[60vh] sm:h-[65vh] md:h-[500px] max-h-[90vh] bg-white/98 backdrop-blur-xl rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-gray-200"
           >
             {/* Chat Header */}
             <div className="bg-coral-gradient p-3 sm:p-4 text-white flex justify-between items-center flex-shrink-0">
@@ -478,13 +478,13 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
             </div>
 
             {/* Messages - White Background */}
-            <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-gray-50 to-white flex flex-col">
+            <div className="flex-1 p-2 sm:p-3 md:p-4 overflow-y-auto space-y-2 sm:space-y-3 bg-gradient-to-b from-gray-50 to-white flex flex-col min-h-0">
               {messages.length === 0 ? (
-                <div className="text-center text-gray-500 py-8 flex items-center justify-center h-full">
+                <div className="text-center text-gray-500 py-4 sm:py-6 md:py-8 flex items-center justify-center h-full">
                   <div>
-                    <div className="text-4xl mb-2">👋</div>
-                    <p className="font-medium text-sm sm:text-base">Start a conversation with Mary George!</p>
-                    <p className="text-xs sm:text-sm mt-2">She'll respond as soon as possible.</p>
+                    <div className="text-3xl sm:text-4xl md:text-5xl mb-2">👋</div>
+                    <p className="font-medium text-xs sm:text-sm md:text-base">Start a conversation with Mary George!</p>
+                    <p className="text-xs sm:text-sm mt-1 md:mt-2">She'll respond as soon as possible.</p>
                   </div>
                 </div>
               ) : (
@@ -494,17 +494,17 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                   key={message.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} flex-shrink-0`}
                 >
                   <div
-                    className={`max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-xs sm:text-sm shadow-md ${
+                    className={`max-w-[85%] sm:max-w-[80%] md:max-w-xs px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2 rounded-lg text-xs sm:text-sm shadow-md ${
                       message.sender === 'user'
                         ? 'bg-coral-gradient text-white'
                         : 'bg-white text-gray-800 border border-gray-200'
                     }`}
                   >
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className={`font-semibold text-xs ${message.sender === 'user' ? 'text-white' : 'text-coral-600'} truncate`}>
+                    <div className="flex items-center space-x-1 sm:space-x-2 mb-0.5 sm:mb-1">
+                      <span className={`font-semibold text-xs truncate ${message.sender === 'user' ? 'text-white' : 'text-coral-600'}`}>
                         {message.senderName}
                       </span>
                       <span className={`text-xs whitespace-nowrap ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
@@ -512,23 +512,23 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                       </span>
                     </div>
                     {message.text.includes('📷') ? (
-                      <div className="mt-2">
-                        <p className="text-xs mb-2">{message.text}</p>
+                      <div className="mt-1 sm:mt-2">
+                        <p className="text-xs mb-1 sm:mb-2">{message.text}</p>
                         {((message as any).imageData || (message as any).imagedata) && (
                           <img 
                             src={(message as any).imageData || (message as any).imagedata} 
                             alt="Chat image" 
-                            className="max-w-full rounded-lg max-h-64 object-cover"
+                            className="max-w-full rounded-lg max-h-40 sm:max-h-48 md:max-h-64 object-cover"
                           />
                         )}
                       </div>
                     ) : (
-                      <p className="break-words">{message.text}</p>
+                      <p className="break-words text-xs sm:text-sm">{message.text}</p>
                     )}
                     
                     {/* Message Status for User Messages */}
                     {message.sender === 'user' && (
-                      <div className="flex justify-end mt-1">
+                      <div className="flex justify-end mt-0.5 sm:mt-1">
                         {message.delivered && (
                           <span className={`text-xs ${message.read ? 'text-blue-200' : 'text-white/60'}`}>
                             {message.read ? '✓✓' : '✓'}
@@ -544,36 +544,36 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
               )}
             </div>
 
-            {/* Input - White Background */}
-            <div className="p-3 sm:p-4 border-t border-gray-200 bg-white flex-shrink-0">
+            {/* Input - White Background - Fully Responsive */}
+            <div className="p-2 sm:p-3 md:p-4 border-t border-gray-200 bg-white flex-shrink-0">
               {/* Image Preview */}
               {selectedImage && (
-                <div className="mb-3 relative">
+                <div className="mb-2 sm:mb-3 relative inline-block">
                   <img 
                     src={selectedImage} 
                     alt="Preview" 
-                    className="max-w-full max-h-32 rounded-lg object-cover"
+                    className="max-w-full max-h-24 sm:max-h-28 md:max-h-32 rounded-lg object-cover"
                   />
                   <button
                     onClick={() => {
                       setSelectedImage(null)
                       setImageFile(null)
                     }}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm hover:bg-red-600"
                   >
                     ×
                   </button>
                 </div>
               )}
               
-              <div className="flex space-x-2 mb-2">
+              <div className="flex gap-1 sm:gap-2 mb-1 sm:mb-2">
                 <input
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type message..."
-                  className="flex-1 px-3 py-2 rounded-lg text-xs sm:text-sm border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
+                  className="flex-1 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm border-2 border-gray-300 focus:border-coral-500 focus:outline-none bg-white text-gray-900 placeholder-gray-500"
                 />
                 <input
                   ref={fileInputRef}
@@ -584,7 +584,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                 />
                 <motion.button
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   title="Upload image"
@@ -594,7 +594,7 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
                 <motion.button
                   onClick={selectedImage ? sendImage : sendMessage}
                   disabled={!inputText.trim() && !selectedImage}
-                  className="btn-coral px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                  className="btn-coral px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
