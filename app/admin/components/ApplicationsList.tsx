@@ -46,17 +46,71 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
           setApplications(data.applications)
           console.log('Applications set:', data.applications)
         } else {
-          console.log('No applications in response')
-          setApplications([])
+          console.log('No applications in response, trying fallback...')
+          // Try fallback to debug endpoint
+          try {
+            const fallbackResponse = await fetch('/api/debug/applications')
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json()
+              if (fallbackData.applications && Array.isArray(fallbackData.applications)) {
+                setApplications(fallbackData.applications)
+                console.log('Loaded applications from fallback:', fallbackData.applications)
+              } else {
+                setApplications([])
+              }
+            } else {
+              setApplications([])
+            }
+          } catch (fallbackError) {
+            console.error('Fallback fetch failed:', fallbackError)
+            setApplications([])
+          }
         }
       } else {
         console.error('Applications API failed with status:', response.status)
-        setApplications([])
+        // Try fallback to debug endpoint
+        try {
+          const fallbackResponse = await fetch('/api/debug/applications')
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json()
+            if (fallbackData.applications && Array.isArray(fallbackData.applications)) {
+              setApplications(fallbackData.applications)
+              console.log('Loaded applications from fallback:', fallbackData.applications)
+            } else {
+              setApplications([])
+            }
+          } else {
+            setApplications([])
+          }
+        } catch (fallbackError) {
+          console.error('Fallback fetch failed:', fallbackError)
+          setApplications([])
+        }
       }
     } catch (error) {
       console.error('Failed to fetch applications:', error)
-      toast.error('Failed to fetch applications')
-      setApplications([])
+      // Try fallback to debug endpoint
+      try {
+        const fallbackResponse = await fetch('/api/debug/applications')
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json()
+          if (fallbackData.applications && Array.isArray(fallbackData.applications)) {
+            setApplications(fallbackData.applications)
+            console.log('Loaded applications from fallback:', fallbackData.applications)
+            toast.success('Loaded applications from local data')
+          } else {
+            toast.error('Failed to fetch applications')
+            setApplications([])
+          }
+        } else {
+          toast.error('Failed to fetch applications')
+          setApplications([])
+        }
+      } catch (fallbackError) {
+        console.error('Fallback fetch failed:', fallbackError)
+        toast.error('Failed to fetch applications')
+        setApplications([])
+      }
     } finally {
       setLoading(false)
     }
