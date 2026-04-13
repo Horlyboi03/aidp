@@ -66,57 +66,39 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    let applications: any[] = []
-    let stats: any = {}
-    let source = 'unknown'
+    console.log('📋 Fetching applications from Postgres...')
     
-    // Try to get from Postgres first
-    try {
-      applications = await getAllApplications()
-      stats = await getApplicationStats()
-      source = 'postgres'
-      console.log('GET applications from Postgres - count:', applications.length)
-    } catch (postgresError) {
-      console.error('Failed to get applications from Postgres:', postgresError)
-      // Fall back to local data
-      console.log('Falling back to local data store')
-      try {
-        applications = dataStore.getApplications()
-        stats = dataStore.getStats()
-        source = 'local'
-        console.log('GET applications from local data - count:', applications.length)
-      } catch (localError) {
-        console.error('Failed to get applications from local data:', localError)
-        // Return empty if both fail
-        applications = []
-        stats = { total: 0, pending: 0, approved: 0, rejected: 0 }
-        source = 'error'
-      }
-    }
+    // Get from Postgres (primary source)
+    const applications = await getAllApplications()
+    const stats = await getApplicationStats()
     
-    console.log('Applications retrieved from:', source, 'count:', applications.length)
-    console.log('Applications:', applications)
+    console.log('✅ Applications retrieved from Postgres - count:', applications.length)
+    console.log('📊 Stats:', stats)
     
     return NextResponse.json({ 
       applications,
       stats,
-      source
+      source: 'postgres'
     })
   } catch (error) {
-    console.error('GET applications error:', error)
-    // Even if there's an error, try to return local data
+    console.error('❌ Failed to get applications from Postgres:', error)
+    
+    // Fallback to local data store
     try {
+      console.log('📋 Falling back to local data store...')
       const applications = dataStore.getApplications()
       const stats = dataStore.getStats()
+      
+      console.log('✅ Applications retrieved from local store - count:', applications.length)
       return NextResponse.json({ 
         applications,
         stats,
         source: 'local-fallback'
       })
     } catch (fallbackError) {
-      console.error('Fallback also failed:', fallbackError)
+      console.error('❌ Fallback also failed:', fallbackError)
       return NextResponse.json(
-        { success: false, message: 'Failed to fetch applications', applications: [], stats: {} },
+        { success: false, message: 'Failed to fetch applications', applications: [], stats: { total: 0, pending: 0, approved: 0, rejected: 0 } },
         { status: 500 }
       )
     }

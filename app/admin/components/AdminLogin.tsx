@@ -31,153 +31,12 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const [showResetPassword, setShowResetPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [biometricAvailable, setBiometricAvailable] = useState(false)
-  const [biometricEnrolled, setBiometricEnrolled] = useState(false)
   
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
   const { register: registerForgot, handleSubmit: handleSubmitForgot, formState: { errors: errorsForgot } } = useForm<ForgotPasswordData>()
   const { register: registerReset, handleSubmit: handleSubmitReset, formState: { errors: errorsReset }, watch } = useForm<ResetPasswordData>()
 
   const newPassword = watch('newPassword')
-
-  // Check for biometric availability and enrollment on mount
-  React.useEffect(() => {
-    const checkBiometric = async () => {
-      try {
-        if (window.PublicKeyCredential) {
-          const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-          setBiometricAvailable(available)
-          
-          // Check if biometric is enrolled
-          const enrolled = localStorage.getItem('adminBiometricEnrolled') === 'true'
-          setBiometricEnrolled(enrolled)
-          
-          // If biometric is enrolled, try auto-login after a short delay
-          if (enrolled && available) {
-            const timer = setTimeout(() => {
-              handleBiometricLogin()
-            }, 1000)
-            return () => clearTimeout(timer)
-          }
-        }
-      } catch (error) {
-        console.log('Biometric not available:', error)
-      }
-    }
-    
-    checkBiometric()
-  }, [])
-
-  const handleBiometricLogin = async () => {
-    setLoading(true)
-    try {
-      // Generate a random challenge
-      const challenge = new Uint8Array(32)
-      crypto.getRandomValues(challenge)
-
-      // Convert credential ID from base64
-      const credentialIdStr = localStorage.getItem('adminCredentialId')
-      if (!credentialIdStr) {
-        toast.error('No biometric credential found. Please login with password first.')
-        setLoading(false)
-        return
-      }
-
-      // Convert credential ID from base64
-      const binaryString = atob(credentialIdStr)
-      const bytes = new Uint8Array(binaryString.length)
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i)
-      }
-
-      try {
-        // Request biometric authentication
-        const assertion = await navigator.credentials.get({
-          publicKey: {
-            challenge: challenge,
-            allowCredentials: [
-              {
-                id: bytes as unknown as BufferSource,
-                type: 'public-key' as const,
-                transports: ['internal'] as AuthenticatorTransport[]
-              }
-            ],
-            userVerification: 'preferred',
-            timeout: 60000
-          }
-        } as any)
-
-        if (assertion) {
-          // Biometric successful - use stored token
-          const storedToken = localStorage.getItem('adminBiometricToken')
-          if (storedToken) {
-            localStorage.setItem('adminToken', storedToken)
-            toast.success('✅ Biometric login successful!')
-            onLogin()
-          } else {
-            toast.error('No stored credentials. Please login with password first.')
-          }
-        }
-      } catch (error: any) {
-        if (error.name === 'NotAllowedError') {
-          console.log('Biometric authentication cancelled by user')
-        } else {
-          console.log('Biometric authentication failed:', error)
-        }
-      }
-    } catch (error) {
-      console.log('Biometric login error:', error)
-    }
-    setLoading(false)
-  }
-
-  const registerBiometric = async (username: string) => {
-    try {
-      const challenge = new Uint8Array(32)
-      crypto.getRandomValues(challenge)
-
-      const credential = await navigator.credentials.create({
-        publicKey: {
-          challenge: challenge,
-          rp: {
-            name: 'AIDP Admin',
-            id: window.location.hostname
-          },
-          user: {
-            id: new Uint8Array(16),
-            name: username,
-            displayName: 'AIDP Admin'
-          },
-          pubKeyCredParams: [
-            { alg: -7, type: 'public-key' },
-            { alg: -257, type: 'public-key' }
-          ],
-          authenticatorSelection: {
-            authenticatorAttachment: 'platform',
-            userVerification: 'preferred',
-            residentKey: 'preferred'
-          },
-          timeout: 60000,
-          attestation: 'direct'
-        }
-      } as any)
-
-      if (credential) {
-        // Store credential ID for future authentication
-        const credentialId = credential.id as unknown as ArrayBuffer
-        const credentialIdArray = new Uint8Array(credentialId)
-        const binaryString = String.fromCharCode.apply(null, Array.from(credentialIdArray) as number[])
-        localStorage.setItem('adminCredentialId', btoa(binaryString))
-        localStorage.setItem('adminBiometricEnrolled', 'true')
-        return true
-      }
-    } catch (error: any) {
-      if (error.name !== 'NotAllowedError') {
-        console.log('Biometric registration error:', error)
-      }
-    }
-    return false
-  }
 
   const onSubmit = async (data: LoginData) => {
     setLoading(true)
@@ -193,21 +52,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         const result = await response.json()
         localStorage.setItem('adminToken', result.token)
         
-        // Store token for biometric login
-        localStorage.setItem('adminBiometricToken', result.token)
-        
-        // Try to register biometric if not already enrolled
-        if (biometricAvailable && !biometricEnrolled) {
-          const registered = await registerBiometric(data.username)
-          if (registered) {
-            toast.success('✅ Login successful! Biometric enabled for next login.')
-          } else {
-            toast.success('✅ Login successful!')
-          }
-        } else {
-          toast.success('✅ Login successful!')
-        }
-        
+        toast.success('✅ Login successful!')
         onLogin()
       } else {
         const error = await response.json()
