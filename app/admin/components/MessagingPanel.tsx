@@ -109,7 +109,6 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
     try {
       const conversationId = `conv-${newApplicantEmail}`
       
-      // Create new conversation
       const response = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -295,19 +294,19 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   }
 
   return (
-    <div className="w-full h-auto min-h-[500px] md:min-h-[600px] lg:min-h-[700px] flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-0">
-      <div className={`w-full md:w-1/3 ${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col glass-effect rounded-lg sm:rounded-xl md:rounded-l-xl md:rounded-r-none p-2 sm:p-3 md:p-4 border-b md:border-b-0 md:border-r border-white/20 min-h-[200px] md:min-h-0`}>
-        <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
-          <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white truncate">Live Chat</h3>
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+    <div className="w-full h-screen flex flex-col md:flex-row gap-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Conversations List - Fully Responsive */}
+      <div className={`w-full md:w-1/3 ${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col glass-effect md:rounded-l-2xl p-3 sm:p-4 border-b md:border-b-0 md:border-r border-white/20 h-1/3 md:h-full overflow-hidden`}>
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-bold text-white truncate">Live Chat</h3>
+          <div className="flex items-center gap-2 flex-shrink-0">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-xs text-gray-400 hidden sm:inline">Real-time</span>
             <motion.button
               onClick={() => {
                 setShowNewConversation(!showNewConversation)
                 if (!showNewConversation) loadApplications()
               }}
-              className="ml-2 px-2 py-1 bg-coral-500 hover:bg-coral-600 text-white rounded text-xs font-semibold"
+              className="px-2 py-1 bg-coral-500 hover:bg-coral-600 text-white rounded text-xs font-semibold"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Start new conversation"
@@ -321,7 +320,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-3 p-3 bg-coral-500/20 rounded-lg border border-coral-400 space-y-2"
+            className="mb-3 p-2 bg-coral-500/20 rounded-lg border border-coral-400 space-y-2"
           >
             <input
               type="text"
@@ -359,13 +358,12 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
         )}
         
         {conversations.length === 0 ? (
-          <div className="text-center py-4 sm:py-6 md:py-8">
-            <div className="text-2xl sm:text-3xl md:text-4xl mb-2">💬</div>
-            <p className="text-gray-400 text-xs sm:text-sm">No conversations yet</p>
-            <p className="text-gray-500 text-xs mt-1">Users will appear here when they start chatting</p>
+          <div className="text-center py-4">
+            <div className="text-2xl mb-2">💬</div>
+            <p className="text-gray-400 text-xs">No conversations yet</p>
           </div>
         ) : (
-          <div className="space-y-1 sm:space-y-2 flex-1 overflow-y-auto">
+          <div className="space-y-1 flex-1 overflow-y-auto">
             {conversations.map((conv) => (
               <motion.div
                 key={conv.id}
@@ -373,7 +371,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   setSelectedConversation(conv)
                   markAsRead(conv.id)
                 }}
-                className={`p-2 sm:p-3 rounded-lg cursor-pointer transition-all ${
+                className={`p-2 rounded-lg cursor-pointer transition-all ${
                   selectedConversation?.id === conv.id
                     ? 'bg-coral-500/20 border border-coral-400'
                     : 'hover:bg-white/10'
@@ -381,7 +379,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 whileHover={{ scale: 1.02 }}
               >
                 <div className="flex justify-between items-start gap-2 mb-1">
-                  <h4 className="text-white font-medium text-xs sm:text-sm md:text-base flex items-center truncate flex-1">
+                  <h4 className="text-white font-medium text-xs md:text-sm flex items-center truncate flex-1">
                     {conv.applicantName}
                     {conv.unreadCount > 0 && (
                       <motion.span
@@ -402,31 +400,31 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   )}
                 </div>
                 <p className="text-gray-400 text-xs truncate">{conv.lastMessage}</p>
-                <p className="text-gray-500 text-xs mt-1">
-                  {new Date(conv.messages[conv.messages.length - 1]?.timestamp || Date.now()).toLocaleString()}
-                </p>
               </motion.div>
             ))}
           </div>
         )}
       </div>
 
-      <div className="w-full md:w-2/3 flex flex-col glass-effect rounded-lg sm:rounded-xl md:rounded-r-xl md:rounded-l-none overflow-hidden min-h-[400px] md:min-h-0">
+      {/* Chat Area - Fully Responsive with Fixed Sizing */}
+      <div className="w-full md:w-2/3 flex flex-col glass-effect md:rounded-r-2xl overflow-hidden h-2/3 md:h-full">
         {selectedConversation ? (
           <>
-            <div className="p-2 sm:p-3 md:p-4 border-b border-white/20 flex justify-between items-center bg-gradient-to-r from-coral-500/10 to-transparent flex-shrink-0">
-              <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white truncate flex-1">
+            {/* Chat Header */}
+            <div className="p-2 sm:p-3 border-b border-white/20 flex justify-between items-center bg-gradient-to-r from-coral-500/10 to-transparent flex-shrink-0">
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-white truncate flex-1">
                 {selectedConversation.applicantName}
               </h3>
               <button
                 onClick={() => setSelectedConversation(null)}
-                className="md:hidden text-gray-400 hover:text-white text-xl ml-2 flex-shrink-0"
+                className="md:hidden text-gray-400 hover:text-white text-lg ml-2 flex-shrink-0"
               >
                 ×
               </button>
             </div>
 
-            <div className="flex-1 p-2 sm:p-3 md:p-4 overflow-y-auto space-y-1.5 sm:space-y-2 md:space-y-3 min-h-0 flex flex-col">
+            {/* Messages - Fixed Height with Scrolling */}
+            <div className="flex-1 p-2 sm:p-3 overflow-y-auto space-y-1.5 sm:space-y-2 min-h-0 flex flex-col">
               {selectedConversation.messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-gray-400 text-xs sm:text-sm">No messages yet. Start the conversation!</p>
@@ -441,7 +439,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                       className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'} flex-shrink-0`}
                     >
                       <div
-                        className={`max-w-[90%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-xs px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2 rounded-lg text-xs sm:text-sm ${
+                        className={`max-w-[85%] sm:max-w-[80%] md:max-w-[70%] px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm ${
                           message.isAdmin
                             ? 'bg-coral-gradient text-white'
                             : 'glass-effect text-gray-200'
@@ -462,7 +460,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                               <img 
                                 src={message.imageData || message.imagedata} 
                                 alt="Chat image" 
-                                className="max-w-full rounded-lg max-h-40 sm:max-h-48 md:max-h-56 object-cover"
+                                className="max-w-full rounded-lg max-h-32 sm:max-h-40 md:max-h-48 object-cover"
                               />
                             )}
                           </div>
@@ -487,20 +485,21 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
               )}
             </div>
 
-            <div className="p-2 sm:p-3 md:p-4 border-t border-white/20 bg-gradient-to-t from-black/20 to-transparent flex-shrink-0">
+            {/* Message Input - Fixed Height */}
+            <div className="p-2 sm:p-3 border-t border-white/20 bg-gradient-to-t from-black/20 to-transparent flex-shrink-0">
               {selectedImage && (
-                <div className="mb-2 sm:mb-3 relative inline-block">
+                <div className="mb-2 relative inline-block">
                   <img 
                     src={selectedImage} 
                     alt="Preview" 
-                    className="max-w-full max-h-20 sm:max-h-24 md:max-h-28 rounded-lg object-cover"
+                    className="max-w-full max-h-16 sm:max-h-20 rounded-lg object-cover"
                   />
                   <button
                     onClick={() => {
                       setSelectedImage(null)
                       setImageFile(null)
                     }}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm hover:bg-red-600"
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
                   >
                     ×
                   </button>
@@ -514,7 +513,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                   placeholder="Type message..."
-                  className="flex-1 form-input px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm"
+                  className="flex-1 form-input px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm"
                 />
                 <input
                   ref={fileInputRef}
@@ -554,7 +553,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 <motion.button
                   onClick={sendMessage}
                   disabled={!newMessage.trim() && !selectedImage}
-                  className="btn-coral px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-coral px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -564,10 +563,10 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center p-2 sm:p-3 md:p-4">
+          <div className="flex-1 flex items-center justify-center p-2 sm:p-3">
             <div className="text-center">
-              <div className="text-4xl sm:text-5xl md:text-6xl mb-2 sm:mb-3 md:mb-4">💬</div>
-              <p className="text-gray-400 text-xs sm:text-sm md:text-base">Select a conversation to start messaging</p>
+              <div className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3">💬</div>
+              <p className="text-gray-400 text-xs sm:text-sm">Select a conversation to start messaging</p>
             </div>
           </div>
         )}

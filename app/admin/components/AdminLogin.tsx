@@ -31,9 +31,8 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const [showResetPassword, setShowResetPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const [useBiometric, setUseBiometric] = useState(false)
   const [biometricAvailable, setBiometricAvailable] = useState(false)
+  const [biometricEnrolled, setBiometricEnrolled] = useState(false)
   
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<LoginData>()
   const { register: registerForgot, handleSubmit: handleSubmitForgot, formState: { errors: errorsForgot } } = useForm<ForgotPasswordData>()
@@ -41,40 +40,36 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
 
   const newPassword = watch('newPassword')
 
-  // Check for biometric availability on mount
+  // Check for biometric availability and enrollment on mount
   React.useEffect(() => {
     const checkBiometric = async () => {
       if (window.PublicKeyCredential) {
         try {
           const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
           setBiometricAvailable(available)
+          
+          // Check if biometric is enrolled
+          const enrolled = localStorage.getItem('adminBiometricEnrolled') === 'true'
+          setBiometricEnrolled(enrolled)
+          
+          // If biometric is enrolled, try auto-login
+          if (enrolled && available) {
+            setTimeout(() => {
+              handleBiometricLogin()
+            }, 500)
+          }
         } catch (error) {
           console.log('Biometric not available:', error)
         }
       }
-      
-      // Load saved credentials if remember me was enabled
-      const savedUsername = localStorage.getItem('adminUsername')
-      if (savedUsername) {
-        setValue('username', savedUsername)
-        setRememberMe(true)
-      }
     }
     
     checkBiometric()
-  }, [setValue])
+  }, [])
 
   const handleBiometricLogin = async () => {
     setLoading(true)
     try {
-      const savedUsername = localStorage.getItem('adminUsername')
-      if (!savedUsername) {
-        toast.error('No saved credentials. Please login first.')
-        setLoading(false)
-        return
-      }
-
-      // Simulate biometric authentication
       const challenge = new Uint8Array(32)
       crypto.getRandomValues(challenge)
 
@@ -88,30 +83,21 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         } as any)
 
         if (assertion) {
-          // Biometric successful - use saved credentials
-          const response = await fetch('/api/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              username: savedUsername,
-              password: localStorage.getItem('adminPasswordHash') || ''
-            })
-          })
-
-          if (response.ok) {
-            const result = await response.json()
-            localStorage.setItem('adminToken', result.token)
-            toast.success('Biometric login successful!')
+          // Biometric successful - use stored token
+          const storedToken = localStorage.getItem('adminBiometricToken')
+          if (storedToken) {
+            localStorage.setItem('adminToken', storedToken)
+            toast.success('✅ Biometric login successful!')
             onLogin()
           } else {
-            toast.error('Login failed')
+            toast.error('No stored credentials. Please login with password first.')
           }
         }
       } catch (error) {
-        toast.error('Biometric authentication failed')
+        console.log('Biometric authentication cancelled or failed')
       }
     } catch (error) {
-      toast.error('Biometric login error')
+      console.log('Biometric login error')
     }
     setLoading(false)
   }
@@ -130,16 +116,11 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         const result = await response.json()
         localStorage.setItem('adminToken', result.token)
         
-        // Save credentials if remember me is checked
-        if (rememberMe) {
-          localStorage.setItem('adminUsername', data.username)
-          localStorage.setItem('adminPasswordHash', btoa(data.password))
-        } else {
-          localStorage.removeItem('adminUsername')
-          localStorage.removeItem('adminPasswordHash')
-        }
+        // Store token for biometric login
+        localStorage.setItem('adminBiometricToken', result.token)
+        localStorage.setItem('adminBiometricEnrolled', 'true')
         
-        toast.success('Login successful!')
+        toast.success('✅ Login successful!')
         onLogin()
       } else {
         const error = await response.json()
@@ -216,7 +197,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
 
   return (
     <section className="min-h-screen flex items-center justify-center px-4 relative">
-      {/* Logo Header - Same size as homepage */}
+      {/* Logo Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -306,31 +287,6 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-coral-500 bg-transparent border-2 border-gray-400 rounded focus:ring-coral-500 focus:ring-2"
-                  />
-                  <span className="text-gray-300 text-sm">Remember me</span>
-                </label>
-                {biometricAvailable && (
-                  <motion.button
-                    type="button"
-                    onClick={handleBiometricLogin}
-                    disabled={loading}
-                    className="flex items-center space-x-2 text-coral-400 hover:text-coral-300 text-sm font-semibold disabled:opacity-50"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span>🔐</span>
-                    <span>Biometric Login</span>
-                  </motion.button>
-                )}
-              </div>
-
               <motion.button
                 type="submit"
                 disabled={loading}
@@ -340,6 +296,20 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </motion.button>
+
+              {biometricAvailable && biometricEnrolled && (
+                <motion.button
+                  type="button"
+                  onClick={handleBiometricLogin}
+                  disabled={loading}
+                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold disabled:opacity-50 flex items-center justify-center space-x-2"
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
+                >
+                  <span>🔐</span>
+                  <span>{loading ? 'Authenticating...' : 'Biometric Login'}</span>
+                </motion.button>
+              )}
             </form>
           ) : showForgotPassword ? (
             <form onSubmit={handleSubmitForgot(onForgotPassword)} className="space-y-6">
