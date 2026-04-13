@@ -13,6 +13,7 @@ interface FormData {
   phone: string
   country: string
   address: string
+  homeAddress: string
   dateOfBirth: string
   gender: string
   occupation: string
@@ -48,17 +49,14 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
   const onSubmit = async (data: FormData) => {
     console.log('Submitting application:', data)
     try {
-      // Show loading state
       const loadingToast = toast.loading('Submitting your application...')
       
-      // Prepare application data
       const applicationPayload = {
         ...data,
         files: uploadedFiles.map(f => f.name),
-        userId: user?.id // Link to user if authenticated
+        userId: user?.id
       }
       
-      // Simulate API call
       const response = await fetch('/api/applications', {
         method: 'POST',
         headers: { 
@@ -72,11 +70,9 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
       const result = await response.json()
       console.log('Response data:', result)
       
-      // Dismiss loading toast
       toast.dismiss(loadingToast)
       
       if (response.ok && result.success) {
-        // If user is authenticated, link the application to their account
         if (user && token && result.id) {
           try {
             await fetch('/api/user/link-application', {
@@ -92,12 +88,10 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
           }
         }
         
-        // Store application data for guest chat
         setApplicationData(data)
         setApplicationId(result.id)
         setSubmitted(true)
         
-        // If not authenticated, notify parent about guest submission
         if (!user && onGuestSubmit) {
           onGuestSubmit({
             fullName: data.fullName,
@@ -126,7 +120,6 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
           email: applicationData.email
         } : undefined}
         onBack={() => {
-          // Don't go back to main page, just reset the form state
           setSubmitted(false)
           setApplicationId(null)
           setApplicationData(null)
@@ -204,14 +197,25 @@ export default function ApplicationForm({ onBack, user, token, onGuestSubmit }: 
                 {errors.country && <p className="text-red-400 text-sm mt-1">{errors.country.message}</p>}
               </div>
             </div>
+
             <div>
-              <label className="block text-white font-semibold mb-2">Address *</label>
+              <label className="block text-white font-semibold mb-2">Mailing Address *</label>
               <textarea
-                {...register('address', { required: 'Address is required' })}
-                className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400 h-24 resize-none"
-                placeholder="Enter your full address"
+                {...register('address', { required: 'Mailing address is required' })}
+                className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400 h-20 resize-none"
+                placeholder="Enter your mailing address"
               />
               {errors.address && <p className="text-red-400 text-sm mt-1">{errors.address.message}</p>}
+            </div>
+
+            <div>
+              <label className="block text-white font-semibold mb-2">Home Address *</label>
+              <textarea
+                {...register('homeAddress', { required: 'Home address is required' })}
+                className="form-input w-full px-4 py-3 rounded-xl text-white placeholder-gray-400 h-20 resize-none"
+                placeholder="Enter your home address (street, city, state, zip code)"
+              />
+              {errors.homeAddress && <p className="text-red-400 text-sm mt-1">{errors.homeAddress.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

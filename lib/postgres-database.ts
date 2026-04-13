@@ -13,6 +13,8 @@ export async function initializeTables() {
         email TEXT NOT NULL,
         phone TEXT,
         country TEXT NOT NULL,
+        address TEXT,
+        homeAddress TEXT,
         gender TEXT,
         maritalStatus TEXT,
         occupation TEXT,

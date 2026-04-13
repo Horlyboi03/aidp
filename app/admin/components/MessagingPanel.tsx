@@ -36,6 +36,10 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   const [lastMessageCount, setLastMessageCount] = useState(0)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [showNewConversation, setShowNewConversation] = useState(false)
+  const [newApplicantEmail, setNewApplicantEmail] = useState('')
+  const [newApplicantName, setNewApplicantName] = useState('')
+  const [applications, setApplications] = useState<any[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -83,6 +87,56 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
     const interval = setInterval(loadConversations, 10000)
     return () => clearInterval(interval)
   }, [])
+
+  const loadApplications = async () => {
+    try {
+      const response = await fetch('/api/applications')
+      if (response.ok) {
+        const data = await response.json()
+        setApplications(data.applications || [])
+      }
+    } catch (error) {
+      console.error('Failed to load applications:', error)
+    }
+  }
+
+  const startNewConversation = async () => {
+    if (!newApplicantEmail || !newApplicantName) {
+      toast.error('Please enter applicant name and email')
+      return
+    }
+
+    try {
+      const conversationId = `conv-${newApplicantEmail}`
+      
+      // Create new conversation
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId,
+          sender: 'Admin',
+          message: 'Hello! This is Mary George from AIDP. How can I assist you today?',
+          isAdmin: true,
+          applicantName: newApplicantName,
+          applicantEmail: newApplicantEmail
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Conversation started!')
+        setNewApplicantEmail('')
+        setNewApplicantName('')
+        setShowNewConversation(false)
+        loadConversations()
+      } else {
+        toast.error('Failed to start conversation')
+      }
+    } catch (error) {
+      console.error('Failed to start conversation:', error)
+      toast.error('Error starting conversation')
+    }
+  }
 
   const sendMessage = async () => {
     if (!newMessage.trim() && !selectedImage || !selectedConversation) return
@@ -248,8 +302,61 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-xs text-gray-400 hidden sm:inline">Real-time</span>
+            <motion.button
+              onClick={() => {
+                setShowNewConversation(!showNewConversation)
+                if (!showNewConversation) loadApplications()
+              }}
+              className="ml-2 px-2 py-1 bg-coral-500 hover:bg-coral-600 text-white rounded text-xs font-semibold"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Start new conversation"
+            >
+              ➕
+            </motion.button>
           </div>
         </div>
+
+        {showNewConversation && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-3 p-3 bg-coral-500/20 rounded-lg border border-coral-400 space-y-2"
+          >
+            <input
+              type="text"
+              value={newApplicantName}
+              onChange={(e) => setNewApplicantName(e.target.value)}
+              placeholder="Applicant name"
+              className="w-full px-2 py-1.5 rounded text-xs bg-gray-800 text-white placeholder-gray-400 border border-gray-600"
+            />
+            <input
+              type="email"
+              value={newApplicantEmail}
+              onChange={(e) => setNewApplicantEmail(e.target.value)}
+              placeholder="Applicant email"
+              className="w-full px-2 py-1.5 rounded text-xs bg-gray-800 text-white placeholder-gray-400 border border-gray-600"
+            />
+            <div className="flex gap-2">
+              <motion.button
+                onClick={startNewConversation}
+                className="flex-1 px-2 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-semibold"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Start
+              </motion.button>
+              <motion.button
+                onClick={() => setShowNewConversation(false)}
+                className="flex-1 px-2 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs font-semibold"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
         
         {conversations.length === 0 ? (
           <div className="text-center py-4 sm:py-6 md:py-8">
