@@ -41,48 +41,29 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
         const data = await response.json()
         console.log('Applications API data:', data)
         console.log('Applications count:', data.applications?.length || 0)
+        console.log('Data source:', data.source)
         
-        if (data.applications && Array.isArray(data.applications) && data.applications.length > 0) {
+        if (data.applications && Array.isArray(data.applications)) {
           setApplications(data.applications)
-          console.log('Applications set from API:', data.applications)
+          console.log('Applications set:', data.applications.length, 'applications')
+          if (data.source === 'local' || data.source === 'local-fallback') {
+            toast.success(`Loaded ${data.applications.length} applications from local data`)
+          }
         } else {
-          console.log('No applications in API response, trying fallback...')
-          await loadFromFallback()
-        }
-      } else {
-        console.error('Applications API failed with status:', response.status)
-        await loadFromFallback()
-      }
-    } catch (error) {
-      console.error('Failed to fetch applications:', error)
-      await loadFromFallback()
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadFromFallback = async () => {
-    try {
-      console.log('Loading from fallback endpoint...')
-      const fallbackResponse = await fetch('/api/debug/applications')
-      if (fallbackResponse.ok) {
-        const fallbackData = await fallbackResponse.json()
-        console.log('Fallback data:', fallbackData)
-        if (fallbackData.applications && Array.isArray(fallbackData.applications)) {
-          setApplications(fallbackData.applications)
-          console.log('Loaded applications from fallback:', fallbackData.applications.length, 'applications')
-          toast.success(`Loaded ${fallbackData.applications.length} applications from local data`)
-        } else {
-          console.log('No applications in fallback response')
+          console.log('No applications in response')
           setApplications([])
         }
       } else {
-        console.error('Fallback endpoint failed with status:', fallbackResponse.status)
+        console.error('Applications API failed with status:', response.status)
         setApplications([])
+        toast.error('Failed to fetch applications')
       }
-    } catch (fallbackError) {
-      console.error('Fallback fetch failed:', fallbackError)
+    } catch (error) {
+      console.error('Failed to fetch applications:', error)
+      toast.error('Failed to fetch applications')
       setApplications([])
+    } finally {
+      setLoading(false)
     }
   }
 
