@@ -33,34 +33,33 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
 
   const fetchApplications = async () => {
     try {
-      console.log('Fetching applications...')
+      console.log('📋 Fetching applications...')
       const response = await fetch('/api/applications')
-      console.log('Applications API response status:', response.status)
+      console.log('📊 Applications API response status:', response.status)
       
       if (response.ok) {
         const data = await response.json()
-        console.log('Applications API data:', data)
-        console.log('Applications count:', data.applications?.length || 0)
-        console.log('Data source:', data.source)
+        console.log('✅ Applications API data:', data)
+        console.log('📊 Applications count:', data.applications?.length || 0)
+        console.log('📍 Data source:', data.source)
         
         if (data.applications && Array.isArray(data.applications)) {
           setApplications(data.applications)
-          console.log('Applications set:', data.applications.length, 'applications')
-          if (data.source === 'local' || data.source === 'local-fallback') {
-            toast.success(`Loaded ${data.applications.length} applications from local data`)
-          }
+          console.log('✅ Applications set:', data.applications.length, 'applications')
         } else {
-          console.log('No applications in response')
+          console.log('⚠️ No applications in response')
           setApplications([])
         }
       } else {
-        console.error('Applications API failed with status:', response.status)
+        console.error('❌ Applications API failed with status:', response.status)
+        const errorData = await response.json()
+        console.error('❌ Error details:', errorData)
         setApplications([])
-        toast.error('Failed to fetch applications')
+        toast.error(`Failed to fetch applications: ${errorData.message || 'Unknown error'}`)
       }
     } catch (error) {
-      console.error('Failed to fetch applications:', error)
-      toast.error('Failed to fetch applications')
+      console.error('❌ Failed to fetch applications:', error)
+      toast.error(`Failed to fetch applications: ${error instanceof Error ? error.message : 'Unknown error'}`)
       setApplications([])
     } finally {
       setLoading(false)

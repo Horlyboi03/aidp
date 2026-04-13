@@ -60,6 +60,7 @@ export async function GET() {
     
     console.log('✅ Applications retrieved from Postgres - count:', applications.length)
     console.log('📊 Stats:', stats)
+    console.log('📋 First application sample:', applications[0] || 'No applications')
     
     return NextResponse.json({ 
       applications,
@@ -69,9 +70,20 @@ export async function GET() {
   } catch (error) {
     console.error('❌ Failed to get applications from Postgres:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorStack = error instanceof Error ? error.stack : ''
+    
+    console.error('Error details:', errorMessage)
+    console.error('Error stack:', errorStack)
     
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch applications', error: errorMessage, applications: [], stats: { total: 0, pending: 0, approved: 0, rejected: 0 } },
+      { 
+        success: false, 
+        message: 'Failed to fetch applications', 
+        error: errorMessage,
+        stack: errorStack,
+        applications: [], 
+        stats: { total: 0, pending: 0, approved: 0, rejected: 0 } 
+      },
       { status: 500 }
     )
   }
