@@ -600,3 +600,5 @@ function MessagingPanel({ onUnreadCountChange }: MessagingPanelProps) {
   )
 }
 
+export default MessagingPanel
+

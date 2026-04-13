@@ -100,6 +100,72 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
     }
   }
 
+  const deleteApplication = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this application? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/applications/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+
+      if (response.ok) {
+        setApplications(prev => prev.filter(app => app.id !== id))
+        if (selectedApp && selectedApp.id === id) {
+          setSelectedApp(null)
+        }
+        toast.success('Application deleted successfully')
+        if (onStatsUpdate) {
+          onStatsUpdate()
+        }
+      } else {
+        toast.error('Failed to delete application')
+      }
+    } catch (error) {
+      console.error('Failed to delete application:', error)
+      toast.error('Error deleting application')
+    }
+  }
+
+  const startDirectMessage = async (applicantName: string, applicantEmail: string) => {
+    try {
+      const conversationId = `conv-${applicantEmail}`
+      
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId,
+          sender: 'Admin',
+          message: 'Hello! This is Mary George from AIDP. How can I assist you today?',
+          isAdmin: true,
+          applicantName,
+          applicantEmail
+        })
+      })
+
+      if (response.ok) {
+        toast.success('💬 Opening conversation...')
+        setSelectedApp(null)
+        // Navigate to messages tab
+        setTimeout(() => {
+          const event = new CustomEvent('navigateToMessages', {
+            detail: { conversationId, applicantName, applicantEmail }
+          })
+          window.dispatchEvent(event)
+        }, 100)
+      } else {
+        toast.error('Failed to start conversation')
+      }
+    } catch (error) {
+      console.error('Failed to start conversation:', error)
+      toast.error('Error starting conversation')
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     const configs = {
       pending: { bg: 'bg-yellow-500', text: 'Pending' },
@@ -438,6 +504,34 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                   </motion.button>
                 </div>
               )}
+
+              {/* Message and Delete Buttons */}
+              <div className="flex flex-col md:flex-row gap-3 pt-4 border-t border-gray-200">
+                <motion.button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    startDirectMessage(selectedApp.fullName, selectedApp.email)
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span>💬</span>
+                  <span>Message</span>
+                </motion.button>
+                <motion.button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteApplication(selectedApp.id)
+                  }}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span>🗑️</span>
+                  <span>Delete</span>
+                </motion.button>
+              </div>
 
 
             </div>
