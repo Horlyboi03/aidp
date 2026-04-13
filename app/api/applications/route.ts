@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveApplication, getAllApplications, getApplicationStats } from '../../../lib/postgres-database'
+import { dataStore } from '../../../lib/dataStore'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,8 +15,23 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('Creating application:', application)
-    await saveApplication(application)
-    console.log('Application saved to database')
+    
+    // Save to Postgres
+    try {
+      await saveApplication(application)
+      console.log('Application saved to Postgres database')
+    } catch (postgresError) {
+      console.error('Failed to save to Postgres:', postgresError)
+      // Continue anyway - will save to local data
+    }
+    
+    // Also save to local data store as fallback
+    try {
+      dataStore.addApplication(application)
+      console.log('Application also saved to local data store')
+    } catch (localError) {
+      console.error('Failed to save to local data store:', localError)
+    }
     
     // Create submission notification
     try {
@@ -50,10 +66,23 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const applications = await getAllApplications()
-    const stats = await getApplicationStats()
+    let applications = []
+    let stats = {}
     
-    console.log('GET applications - count:', applications.length)
+    // Try to get from Postgres first
+    try {
+      applications = await getAllApplications()
+      stats = await getApplicationStats()
+      console.log('GET applications from Postgres - count:', applications.length)
+    } catch (postgresError) {
+      console.error('Failed to get applications from Postgres:', postgresError)
+      // Fall back to local data
+      console.log('Falling back to local data store')
+      applications = dataStore.getApplications()
+      stats = dataStore.getStats()
+      console.log('GET applications from local data - count:', applications.length)
+    }
+    
     console.log('Applications:', applications)
     
     return NextResponse.json({ 
