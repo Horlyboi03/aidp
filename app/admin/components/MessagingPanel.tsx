@@ -51,6 +51,22 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
     scrollToBottom()
   }, [selectedConversation?.messages])
 
+  // Listen for select conversation event
+  useEffect(() => {
+    const handleSelectConversation = (event: any) => {
+      const { conversationId, applicantName, applicantEmail } = event.detail
+      // Find and select the conversation
+      const conversation = conversations.find(c => c.id === conversationId)
+      if (conversation) {
+        setSelectedConversation(conversation)
+        markAsRead(conversationId)
+      }
+    }
+
+    window.addEventListener('selectConversation', handleSelectConversation)
+    return () => window.removeEventListener('selectConversation', handleSelectConversation)
+  }, [conversations])
+
   const loadConversations = async () => {
     try {
       const response = await fetch('/api/messages')

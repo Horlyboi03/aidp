@@ -34,7 +34,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const [biometricAvailable, setBiometricAvailable] = useState(false)
   const [biometricEnrolled, setBiometricEnrolled] = useState(false)
   
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm<LoginData>()
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
   const { register: registerForgot, handleSubmit: handleSubmitForgot, formState: { errors: errorsForgot } } = useForm<ForgotPasswordData>()
   const { register: registerReset, handleSubmit: handleSubmitReset, formState: { errors: errorsReset }, watch } = useForm<ResetPasswordData>()
 
@@ -43,8 +43,8 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   // Check for biometric availability and enrollment on mount
   React.useEffect(() => {
     const checkBiometric = async () => {
-      if (window.PublicKeyCredential) {
-        try {
+      try {
+        if (window.PublicKeyCredential) {
           const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
           setBiometricAvailable(available)
           
@@ -56,11 +56,11 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
           if (enrolled && available) {
             setTimeout(() => {
               handleBiometricLogin()
-            }, 500)
+            }, 800)
           }
-        } catch (error) {
-          console.log('Biometric not available:', error)
         }
+      } catch (error) {
+        console.log('Biometric not available:', error)
       }
     }
     
@@ -70,15 +70,39 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const handleBiometricLogin = async () => {
     setLoading(true)
     try {
+      // Generate a random challenge
       const challenge = new Uint8Array(32)
       crypto.getRandomValues(challenge)
 
+      // Convert credential ID from base64
+      const credentialIdStr = localStorage.getItem('adminCredentialId')
+      if (!credentialIdStr) {
+        toast.error('No biometric credential found. Please login with password first.')
+        setLoading(false)
+        return
+      }
+
+      // Convert credential ID from base64
+      const binaryString = atob(credentialIdStr)
+      const bytes = new Uint8Array(binaryString.length)
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i)
+      }
+
       try {
+        // Request biometric authentication
         const assertion = await navigator.credentials.get({
           publicKey: {
             challenge: challenge,
-            timeout: 60000,
-            userVerification: 'preferred'
+            allowCredentials: [
+              {
+                id: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+                type: 'public-key' as const,
+                transports: ['internal'] as AuthenticatorTransport[]
+              }
+            ],
+            userVerification: 'preferred',
+            timeout: 60000
           }
         } as any)
 
@@ -93,13 +117,65 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             toast.error('No stored credentials. Please login with password first.')
           }
         }
-      } catch (error) {
-        console.log('Biometric authentication cancelled or failed')
+      } catch (error: any) {
+        if (error.name === 'NotAllowedError') {
+          console.log('Biometric authentication cancelled by user')
+        } else {
+          console.log('Biometric authentication failed:', error)
+        }
       }
     } catch (error) {
-      console.log('Biometric login error')
+      console.log('Biometric login error:', error)
     }
     setLoading(false)
+  }
+
+  const registerBiometric = async (username: string) => {
+    try {
+      const challenge = new Uint8Array(32)
+      crypto.getRandomValues(challenge)
+
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge: challenge,
+          rp: {
+            name: 'AIDP Admin',
+            id: window.location.hostname
+          },
+          user: {
+            id: new Uint8Array(16),
+            name: username,
+            displayName: 'AIDP Admin'
+          },
+          pubKeyCredParams: [
+            { alg: -7, type: 'public-key' },
+            { alg: -257, type: 'public-key' }
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: 'platform',
+            userVerification: 'preferred',
+            residentKey: 'preferred'
+          },
+          timeout: 60000,
+          attestation: 'direct'
+        }
+      } as any)
+
+      if (credential) {
+        // Store credential ID for future authentication
+        const credentialId = credential.id as unknown as ArrayBuffer
+        const credentialIdArray = new Uint8Array(credentialId)
+        const binaryString = String.fromCharCode.apply(null, Array.from(credentialIdArray) as number[])
+        localStorage.setItem('adminCredentialId', btoa(binaryString))
+        localStorage.setItem('adminBiometricEnrolled', 'true')
+        return true
+      }
+    } catch (error: any) {
+      if (error.name !== 'NotAllowedError') {
+        console.log('Biometric registration error:', error)
+      }
+    }
+    return false
   }
 
   const onSubmit = async (data: LoginData) => {
@@ -118,9 +194,19 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         
         // Store token for biometric login
         localStorage.setItem('adminBiometricToken', result.token)
-        localStorage.setItem('adminBiometricEnrolled', 'true')
         
-        toast.success('✅ Login successful!')
+        // Try to register biometric if not already enrolled
+        if (biometricAvailable && !biometricEnrolled) {
+          const registered = await registerBiometric(data.username)
+          if (registered) {
+            toast.success('✅ Login successful! Biometric enabled for next login.')
+          } else {
+            toast.success('✅ Login successful!')
+          }
+        } else {
+          toast.success('✅ Login successful!')
+        }
+        
         onLogin()
       } else {
         const error = await response.json()
@@ -307,7 +393,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                   whileTap={{ scale: loading ? 1 : 0.98 }}
                 >
                   <span>🔐</span>
-                  <span>{loading ? 'Authenticating...' : 'Biometric Login'}</span>
+                  <span>{loading ? 'Authenticating...' : 'Use Biometric (Face ID / Fingerprint)'}</span>
                 </motion.button>
               )}
             </form>
