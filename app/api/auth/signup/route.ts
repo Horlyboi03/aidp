@@ -73,18 +73,26 @@ export async function POST(request: NextRequest) {
     try {
       await saveUser(user)
       savedToPostgres = true
-      console.log('User saved to Postgres')
+      console.log('✅ User saved to Postgres successfully')
     } catch (postgresError) {
-      console.error('Failed to save user to Postgres:', postgresError)
-      // Continue - will save to local store
+      console.error('❌ Failed to save user to Postgres:', postgresError)
+      // Continue - will save to local store as fallback
     }
 
     // Also save to local store as fallback
     try {
       localUsers.push(user)
-      console.log('User also saved to local store')
+      console.log('✅ User also saved to local store as fallback')
     } catch (localError) {
-      console.error('Failed to save user to local store:', localError)
+      console.error('❌ Failed to save user to local store:', localError)
+    }
+
+    // Ensure at least one storage succeeded
+    if (!savedToPostgres && localUsers.length === 0) {
+      return NextResponse.json(
+        { success: false, message: 'Failed to save user to any storage' },
+        { status: 500 }
+      )
     }
 
     // Send welcome email

@@ -5,6 +5,9 @@ import bcrypt from 'bcryptjs'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 
+// In-memory store for local fallback (same as signup)
+const localUsers: any[] = []
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
@@ -17,10 +20,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user from database
-    const user = await getUserByEmail(email) as any
+    // Try to get user from Postgres first
+    let user = null
+    try {
+      user = await getUserByEmail(email) as any
+      console.log('User found in Postgres:', !!user)
+    } catch (postgresError) {
+      console.error('Failed to get user from Postgres:', postgresError)
+      // Try local store as fallback
+      user = localUsers.find(u => u.email === email)
+      console.log('User found in local store:', !!user)
+    }
 
     if (!user) {
+      console.log('User not found for email:', email)
       return NextResponse.json(
         { success: false, message: 'Invalid email or password' },
         { status: 401 }
@@ -28,9 +41,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
+    console.log('Verifying password for user:', email)
     const isValidPassword = await bcrypt.compare(password, user.password)
 
     if (!isValidPassword) {
+      console.log('Invalid password for user:', email)
       return NextResponse.json(
         { success: false, message: 'Invalid email or password' },
         { status: 401 }
@@ -47,6 +62,7 @@ export async function POST(request: NextRequest) {
     // Return user without password and token
     const { password: _, ...userWithoutPassword } = user
 
+    console.log('User signed in successfully:', email)
     return NextResponse.json({
       success: true,
       message: 'Signed in successfully',
@@ -55,8 +71,9 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Signin error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { success: false, message: 'Failed to sign in' },
+      { success: false, message: 'Failed to sign in', error: errorMessage },
       { status: 500 }
     )
   }
