@@ -94,7 +94,7 @@ export async function saveApplication(application: any) {
   
   await sql`
     INSERT INTO applications (
-      id, fullName, email, phone, country, gender, maritalStatus, occupation,
+      id, fullName, email, phone, country, address, homeAddress, gender, maritalStatus, occupation,
       monthlyIncome, grantAmount, grantPurpose, paymentMethod, description,
       status, submittedAt
     ) VALUES (
@@ -103,6 +103,8 @@ export async function saveApplication(application: any) {
       ${application.email},
       ${application.phone || null},
       ${application.country},
+      ${application.address || null},
+      ${application.homeAddress || null},
       ${application.gender || null},
       ${application.maritalStatus || null},
       ${application.occupation || null},

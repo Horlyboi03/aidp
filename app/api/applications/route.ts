@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveApplication, getAllApplications, getApplicationStats } from '../../../lib/postgres-database'
-import { dataStore } from '../../../lib/dataStore'
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
-    console.log('Received application data:', data)
+    console.log('📝 Received application data:', data)
     
     const application = {
       id: `APP-${Date.now()}`,
@@ -14,24 +13,11 @@ export async function POST(request: NextRequest) {
       submittedAt: new Date().toISOString(),
     }
     
-    console.log('Creating application:', application)
+    console.log('➕ Creating application:', application.id)
     
-    // Save to Postgres
-    try {
-      await saveApplication(application)
-      console.log('Application saved to Postgres database')
-    } catch (postgresError) {
-      console.error('Failed to save to Postgres:', postgresError)
-      // Continue anyway - will save to local data
-    }
-    
-    // Also save to local data store as fallback
-    try {
-      dataStore.addApplication(application)
-      console.log('Application also saved to local data store')
-    } catch (localError) {
-      console.error('Failed to save to local data store:', localError)
-    }
+    // Save to Postgres (only source of truth)
+    await saveApplication(application)
+    console.log('✅ Application saved to Postgres database')
     
     // Create submission notification
     try {
@@ -44,19 +30,19 @@ export async function POST(request: NextRequest) {
           type: 'submitted'
         })
       })
-      console.log('Notification response:', notificationResponse.status)
+      console.log('📬 Notification response:', notificationResponse.status)
     } catch (error) {
-      console.error('Failed to create submission notification:', error)
+      console.error('❌ Failed to create submission notification:', error)
     }
     
-    console.log('Returning success response')
+    console.log('✅ Returning success response')
     return NextResponse.json({ 
       success: true, 
       id: application.id,
       message: 'Application submitted successfully' 
     })
   } catch (error) {
-    console.error('Application submission error:', error)
+    console.error('❌ Application submission error:', error)
     return NextResponse.json(
       { success: false, message: 'Failed to submit application', error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -68,7 +54,7 @@ export async function GET() {
   try {
     console.log('📋 Fetching applications from Postgres...')
     
-    // Get from Postgres (primary source)
+    // Get from Postgres (only source of truth)
     const applications = await getAllApplications()
     const stats = await getApplicationStats()
     
@@ -82,25 +68,11 @@ export async function GET() {
     })
   } catch (error) {
     console.error('❌ Failed to get applications from Postgres:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     
-    // Fallback to local data store
-    try {
-      console.log('📋 Falling back to local data store...')
-      const applications = dataStore.getApplications()
-      const stats = dataStore.getStats()
-      
-      console.log('✅ Applications retrieved from local store - count:', applications.length)
-      return NextResponse.json({ 
-        applications,
-        stats,
-        source: 'local-fallback'
-      })
-    } catch (fallbackError) {
-      console.error('❌ Fallback also failed:', fallbackError)
-      return NextResponse.json(
-        { success: false, message: 'Failed to fetch applications', applications: [], stats: { total: 0, pending: 0, approved: 0, rejected: 0 } },
-        { status: 500 }
-      )
-    }
+    return NextResponse.json(
+      { success: false, message: 'Failed to fetch applications', error: errorMessage, applications: [], stats: { total: 0, pending: 0, approved: 0, rejected: 0 } },
+      { status: 500 }
+    )
   }
 }
