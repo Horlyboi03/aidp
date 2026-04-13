@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveUser, getUserByEmail } from '../../../../lib/postgres-database'
 import { sendEmail, getWelcomeEmailTemplate } from '../../../../lib/emailService'
+import { dataStore as applicationDataStore } from '../../../../lib/dataStore'
 import bcrypt from 'bcryptjs'
+
+// Simple in-memory user store for local fallback
+const localUsers: any[] = []
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +37,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await getUserByEmail(email)
+    let existingUser = null
+    try {
+      existingUser = await getUserByEmail(email)
+    } catch (postgresError) {
+      console.error('Failed to check user in Postgres:', postgresError)
+      // Check in local store
+      existingUser = localUsers.find(u => u.email === email)
+    }
+
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User already exists with this email' },
@@ -56,7 +68,24 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     }
 
-    await saveUser(user)
+    // Try to save to Postgres
+    let savedToPostgres = false
+    try {
+      await saveUser(user)
+      savedToPostgres = true
+      console.log('User saved to Postgres')
+    } catch (postgresError) {
+      console.error('Failed to save user to Postgres:', postgresError)
+      // Continue - will save to local store
+    }
+
+    // Also save to local store as fallback
+    try {
+      localUsers.push(user)
+      console.log('User also saved to local store')
+    } catch (localError) {
+      console.error('Failed to save user to local store:', localError)
+    }
 
     // Send welcome email
     try {
@@ -77,7 +106,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Account created successfully',
-      user: userWithoutPassword
+      user: userWithoutPassword,
+      savedToPostgres
     })
   } catch (error) {
     console.error('Signup error:', error)
