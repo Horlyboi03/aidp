@@ -43,8 +43,8 @@ export default function LiveChatWidget({ user, token, guestInfo }: LiveChatWidge
     email: guestInfo.email
   } : null)
   
-  // Generate conversationId - ensure it's consistent
-  const conversationId = chatUser?.id ? `conv-${chatUser.id}` : null
+  // Generate conversationId - use email for consistency with admin
+  const conversationId = chatUser?.email ? `conv-${chatUser.email}` : null
 
   // Debug logging
   useEffect(() => {

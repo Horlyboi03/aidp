@@ -383,19 +383,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                 {loading ? 'Signing In...' : 'Sign In'}
               </motion.button>
 
-              {biometricAvailable && biometricEnrolled && (
-                <motion.button
-                  type="button"
-                  onClick={handleBiometricLogin}
-                  disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold disabled:opacity-50 flex items-center justify-center space-x-2"
-                  whileHover={{ scale: loading ? 1 : 1.02 }}
-                  whileTap={{ scale: loading ? 1 : 0.98 }}
-                >
-                  <span>🔐</span>
-                  <span>{loading ? 'Authenticating...' : 'Use Biometric (Face ID / Fingerprint)'}</span>
-                </motion.button>
-              )}
+
             </form>
           ) : showForgotPassword ? (
             <form onSubmit={handleSubmitForgot(onForgotPassword)} className="space-y-6">

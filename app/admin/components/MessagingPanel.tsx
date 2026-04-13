@@ -29,7 +29,7 @@ interface MessagingPanelProps {
   onUnreadCountChange?: (count: number) => void
 }
 
-export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelProps) {
+function MessagingPanel({ onUnreadCountChange }: MessagingPanelProps) {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [newMessage, setNewMessage] = useState('')
@@ -81,16 +81,16 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
         const data = await response.json()
         if (data.conversations && Array.isArray(data.conversations)) {
           const totalMessages = data.conversations.reduce((sum: number, conv: Conversation) => sum + conv.messages.length, 0)
-          
+
           if (lastMessageCount > 0 && totalMessages > lastMessageCount) {
             const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT')
             audio.volume = 0.3
             audio.play().catch(() => {})
           }
-          
+
           setConversations(data.conversations)
           setLastMessageCount(totalMessages)
-          
+
           const totalUnread = data.conversations.reduce((sum: number, conv: Conversation) => sum + conv.unreadCount, 0)
           if (onUnreadCountChange) {
             onUnreadCountChange(totalUnread)
@@ -131,7 +131,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
 
     try {
       const conversationId = `conv-${newApplicantEmail}`
-      
+
       const response = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,10 +191,10 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
     )
 
     setSelectedConversation(prev =>
-      prev ? { 
-        ...prev, 
+      prev ? {
+        ...prev,
         messages: [...prev.messages, tempMessage],
-        lastMessage: messageText 
+        lastMessage: messageText
       } : null
     )
 
@@ -217,7 +217,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
         const result = await response.json()
         setSelectedImage(null)
         setImageFile(null)
-        
+
         if (result.conversation) {
           setConversations(prev =>
             prev.map(conv =>
@@ -231,7 +231,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 : conv
             )
           )
-          
+
           setSelectedConversation(prev =>
             prev ? {
               ...prev,
@@ -281,18 +281,18 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
       if (response.ok) {
         setConversations(prev =>
           prev.map(conv =>
-            conv.id === conversationId 
-              ? { 
-                  ...conv, 
+            conv.id === conversationId
+              ? {
+                  ...conv,
                   unreadCount: 0,
                   messages: conv.messages.map(msg => ({ ...msg, read: true }))
-                } 
+                }
               : conv
           )
         )
 
         if (selectedConversation && selectedConversation.id === conversationId) {
-          setSelectedConversation(prev => 
+          setSelectedConversation(prev =>
             prev ? {
               ...prev,
               unreadCount: 0,
@@ -304,7 +304,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
         setTimeout(() => {
           loadConversations()
           if (onUnreadCountChange) {
-            const newTotalUnread = conversations.reduce((sum, conv) => 
+            const newTotalUnread = conversations.reduce((sum, conv) =>
               conv.id === conversationId ? sum : sum + conv.unreadCount, 0
             )
             onUnreadCountChange(newTotalUnread)
@@ -317,19 +317,19 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   }
 
   return (
-    <div className="w-full h-screen flex flex-col md:flex-row gap-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="w-full h-screen flex flex-col md:flex-row gap-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
       {/* Conversations List - Fully Responsive */}
-      <div className={`w-full md:w-1/3 ${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col glass-effect md:rounded-l-2xl p-3 sm:p-4 border-b md:border-b-0 md:border-r border-white/20 h-1/3 md:h-full overflow-hidden`}>
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="text-sm sm:text-base md:text-lg font-bold text-white truncate">Live Chat</h3>
-          <div className="flex items-center gap-2 flex-shrink-0">
+      <div className={`w-full md:w-1/3 ${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col glass-effect md:rounded-l-2xl p-2 sm:p-3 md:p-4 border-b md:border-b-0 md:border-r border-white/20 h-1/3 md:h-full overflow-hidden`}>
+        <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4 flex-shrink-0">
+          <h3 className="text-xs sm:text-sm md:text-base font-bold text-white truncate">Live Chat</h3>
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <motion.button
               onClick={() => {
                 setShowNewConversation(!showNewConversation)
                 if (!showNewConversation) loadApplications()
               }}
-              className="px-2 py-1 bg-coral-500 hover:bg-coral-600 text-white rounded text-xs font-semibold"
+              className="px-1.5 sm:px-2 py-1 bg-coral-500 hover:bg-coral-600 text-white rounded text-xs font-semibold flex-shrink-0"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Start new conversation"
@@ -343,26 +343,26 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-3 p-2 bg-coral-500/20 rounded-lg border border-coral-400 space-y-2"
+            className="mb-2 sm:mb-3 p-1.5 sm:p-2 bg-coral-500/20 rounded-lg border border-coral-400 space-y-1.5 sm:space-y-2 flex-shrink-0"
           >
             <input
               type="text"
               value={newApplicantName}
               onChange={(e) => setNewApplicantName(e.target.value)}
-              placeholder="Applicant name"
-              className="w-full px-2 py-1.5 rounded text-xs bg-gray-800 text-white placeholder-gray-400 border border-gray-600"
+              placeholder="Name"
+              className="w-full px-2 py-1 rounded text-xs bg-gray-800 text-white placeholder-gray-400 border border-gray-600"
             />
             <input
               type="email"
               value={newApplicantEmail}
               onChange={(e) => setNewApplicantEmail(e.target.value)}
-              placeholder="Applicant email"
-              className="w-full px-2 py-1.5 rounded text-xs bg-gray-800 text-white placeholder-gray-400 border border-gray-600"
+              placeholder="Email"
+              className="w-full px-2 py-1 rounded text-xs bg-gray-800 text-white placeholder-gray-400 border border-gray-600"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2">
               <motion.button
                 onClick={startNewConversation}
-                className="flex-1 px-2 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-semibold"
+                className="flex-1 px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-semibold"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -370,7 +370,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
               </motion.button>
               <motion.button
                 onClick={() => setShowNewConversation(false)}
-                className="flex-1 px-2 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs font-semibold"
+                className="flex-1 px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs font-semibold"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -379,14 +379,16 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
             </div>
           </motion.div>
         )}
-        
+
         {conversations.length === 0 ? (
-          <div className="text-center py-4">
-            <div className="text-2xl mb-2">💬</div>
-            <p className="text-gray-400 text-xs">No conversations yet</p>
+          <div className="text-center py-2 sm:py-3 md:py-4 flex-1 flex items-center justify-center">
+            <div className="text-gray-400">
+              <div className="text-lg sm:text-xl md:text-2xl mb-1">💬</div>
+              <p className="text-xs sm:text-sm">No conversations yet</p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-1 flex-1 overflow-y-auto">
+          <div className="space-y-0.5 sm:space-y-1 flex-1 overflow-y-auto min-h-0">
             {conversations.map((conv) => (
               <motion.div
                 key={conv.id}
@@ -394,21 +396,21 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   setSelectedConversation(conv)
                   markAsRead(conv.id)
                 }}
-                className={`p-2 rounded-lg cursor-pointer transition-all ${
+                className={`p-1.5 sm:p-2 rounded-lg cursor-pointer transition-all ${
                   selectedConversation?.id === conv.id
                     ? 'bg-coral-500/20 border border-coral-400'
                     : 'hover:bg-white/10'
                 }`}
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="flex justify-between items-start gap-2 mb-1">
+                <div className="flex justify-between items-start gap-1 sm:gap-2 mb-0.5 sm:mb-1">
                   <h4 className="text-white font-medium text-xs md:text-sm flex items-center truncate flex-1">
                     {conv.applicantName}
                     {conv.unreadCount > 0 && (
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="ml-2 w-2 h-2 bg-coral-400 rounded-full flex-shrink-0"
+                        className="ml-1 sm:ml-2 w-1.5 h-1.5 bg-coral-400 rounded-full flex-shrink-0"
                       />
                     )}
                   </h4>
@@ -416,7 +418,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="bg-coral-500 text-white text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                      className="bg-coral-500 text-white text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
                     >
                       {conv.unreadCount}
                     </motion.span>
@@ -447,7 +449,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
             </div>
 
             {/* Messages - Fixed Height with Scrolling */}
-            <div className="flex-1 p-2 sm:p-3 overflow-y-auto space-y-1.5 sm:space-y-2 min-h-0 flex flex-col">
+            <div className="flex-1 p-2 sm:p-3 overflow-y-auto space-y-1 sm:space-y-2 min-h-0 flex flex-col">
               {selectedConversation.messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-gray-400 text-xs sm:text-sm">No messages yet. Start the conversation!</p>
@@ -462,7 +464,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                       className={`flex ${message.isAdmin ? 'justify-end' : 'justify-start'} flex-shrink-0`}
                     >
                       <div
-                        className={`max-w-[85%] sm:max-w-[80%] md:max-w-[70%] px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm ${
+                        className={`max-w-[85%] sm:max-w-[80%] md:max-w-[70%] px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm break-words ${
                           message.isAdmin
                             ? 'bg-coral-gradient text-white'
                             : 'glass-effect text-gray-200'
@@ -480,17 +482,17 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                           <div className="mt-1 sm:mt-2">
                             <p className="text-xs mb-1 sm:mb-2">{message.message}</p>
                             {(message.imageData || message.imagedata) && (
-                              <img 
-                                src={message.imageData || message.imagedata} 
-                                alt="Chat image" 
-                                className="max-w-full rounded-lg max-h-32 sm:max-h-40 md:max-h-48 object-cover"
+                              <img
+                                src={message.imageData || message.imagedata}
+                                alt="Chat image"
+                                className="max-w-full rounded-lg max-h-24 sm:max-h-32 md:max-h-40 object-cover"
                               />
                             )}
                           </div>
                         ) : (
                           <p className="break-words text-xs sm:text-sm">{message.message}</p>
                         )}
-                        
+
                         {message.isAdmin && (
                           <div className="flex justify-end mt-0.5 sm:mt-1">
                             {message.delivered && (
@@ -511,10 +513,10 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
             {/* Message Input - Fixed Height */}
             <div className="p-2 sm:p-3 border-t border-white/20 bg-gradient-to-t from-black/20 to-transparent flex-shrink-0">
               {selectedImage && (
-                <div className="mb-2 relative inline-block">
-                  <img 
-                    src={selectedImage} 
-                    alt="Preview" 
+                <div className="mb-1 sm:mb-2 relative inline-block">
+                  <img
+                    src={selectedImage}
+                    alt="Preview"
                     className="max-w-full max-h-16 sm:max-h-20 rounded-lg object-cover"
                   />
                   <button
@@ -522,13 +524,13 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                       setSelectedImage(null)
                       setImageFile(null)
                     }}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-xs hover:bg-red-600"
                   >
                     ×
                   </button>
                 </div>
               )}
-              
+
               <div className="flex gap-1 sm:gap-2">
                 <input
                   type="text"
@@ -536,7 +538,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                   placeholder="Type message..."
-                  className="flex-1 form-input px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm"
+                  className="flex-1 form-input px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                 />
                 <input
                   ref={fileInputRef}
@@ -566,7 +568,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 />
                 <motion.button
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   title="Upload image"
@@ -576,7 +578,7 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
                 <motion.button
                   onClick={sendMessage}
                   disabled={!newMessage.trim() && !selectedImage}
-                  className="btn-coral px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-coral px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -597,3 +599,4 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
     </div>
   )
 }
+

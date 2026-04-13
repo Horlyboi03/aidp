@@ -100,42 +100,6 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
     }
   }
 
-  const startConversation = async (applicantName: string, applicantEmail: string) => {
-    try {
-      const conversationId = `conv-${applicantEmail}`
-      
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationId,
-          sender: 'Admin',
-          message: 'Hello! This is Mary George from AIDP. How can I assist you today?',
-          isAdmin: true,
-          applicantName,
-          applicantEmail
-        })
-      })
-
-      if (response.ok) {
-        // Dispatch event to navigate to messages tab and open conversation
-        setTimeout(() => {
-          const event = new CustomEvent('navigateToMessages', {
-            detail: { conversationId, applicantName, applicantEmail }
-          })
-          window.dispatchEvent(event)
-          console.log('Dispatched navigateToMessages event:', { conversationId, applicantName, applicantEmail })
-        }, 100)
-        toast.success('💬 Opening conversation...')
-      } else {
-        toast.error('Failed to start conversation')
-      }
-    } catch (error) {
-      console.error('Failed to start conversation:', error)
-      toast.error('Error starting conversation')
-    }
-  }
-
   const getStatusBadge = (status: string) => {
     const configs = {
       pending: { bg: 'bg-yellow-500', text: 'Pending' },
@@ -475,20 +439,7 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
                 </div>
               )}
 
-              {/* Message Applicant Button - Always Visible */}
-              <motion.button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  startConversation(selectedApp.fullName, selectedApp.email)
-                  setSelectedApp(null)
-                }}
-                className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2 mt-3"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span>💬</span>
-                <span>Message Applicant</span>
-              </motion.button>
+
             </div>
           </motion.div>
         </motion.div>
