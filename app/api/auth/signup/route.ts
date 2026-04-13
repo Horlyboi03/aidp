@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveUser, getUserByEmail } from '../../../../lib/postgres-database'
 import { sendEmail, getWelcomeEmailTemplate } from '../../../../lib/emailService'
-import { dataStore as applicationDataStore } from '../../../../lib/dataStore'
+import { userDataStore } from '../../../../lib/userDataStore'
 import bcrypt from 'bcryptjs'
-
-// Simple in-memory user store for local fallback
-const localUsers: any[] = []
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,8 +39,11 @@ export async function POST(request: NextRequest) {
       existingUser = await getUserByEmail(email)
     } catch (postgresError) {
       console.error('Failed to check user in Postgres:', postgresError)
-      // Check in local store
-      existingUser = localUsers.find(u => u.email === email)
+    }
+
+    // Also check in persistent store
+    if (!existingUser) {
+      existingUser = userDataStore.getUserByEmail(email)
     }
 
     if (existingUser) {
@@ -76,19 +76,19 @@ export async function POST(request: NextRequest) {
       console.log('✅ User saved to Postgres successfully')
     } catch (postgresError) {
       console.error('❌ Failed to save user to Postgres:', postgresError)
-      // Continue - will save to local store as fallback
+      // Continue - will save to persistent store
     }
 
-    // Also save to local store as fallback
+    // Also save to persistent store as fallback
     try {
-      localUsers.push(user)
-      console.log('✅ User also saved to local store as fallback')
+      userDataStore.addUser(user)
+      console.log('✅ User also saved to persistent store')
     } catch (localError) {
-      console.error('❌ Failed to save user to local store:', localError)
+      console.error('❌ Failed to save user to persistent store:', localError)
     }
 
     // Ensure at least one storage succeeded
-    if (!savedToPostgres && localUsers.length === 0) {
+    if (!savedToPostgres && userDataStore.getUserByEmail(email) === undefined) {
       return NextResponse.json(
         { success: false, message: 'Failed to save user to any storage' },
         { status: 500 }

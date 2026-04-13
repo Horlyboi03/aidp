@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserByEmail } from '../../../../lib/postgres-database'
+import { userDataStore } from '../../../../lib/userDataStore'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
-
-// In-memory store for local fallback (same as signup)
-const localUsers: any[] = []
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,16 +22,19 @@ export async function POST(request: NextRequest) {
     let user = null
     try {
       user = await getUserByEmail(email) as any
-      console.log('User found in Postgres:', !!user)
+      console.log('✅ User found in Postgres:', !!user)
     } catch (postgresError) {
-      console.error('Failed to get user from Postgres:', postgresError)
-      // Try local store as fallback
-      user = localUsers.find(u => u.email === email)
-      console.log('User found in local store:', !!user)
+      console.error('❌ Failed to get user from Postgres:', postgresError)
+    }
+
+    // Try persistent store as fallback
+    if (!user) {
+      user = userDataStore.getUserByEmail(email)
+      console.log('✅ User found in persistent store:', !!user)
     }
 
     if (!user) {
-      console.log('User not found for email:', email)
+      console.log('❌ User not found for email:', email)
       return NextResponse.json(
         { success: false, message: 'Invalid email or password' },
         { status: 401 }
