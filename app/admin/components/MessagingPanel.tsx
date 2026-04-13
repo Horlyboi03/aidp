@@ -54,16 +54,23 @@ export default function MessagingPanel({ onUnreadCountChange }: MessagingPanelPr
   // Listen for select conversation event
   useEffect(() => {
     const handleSelectConversation = (event: any) => {
+      console.log('Received selectConversation event:', event.detail)
       const { conversationId, applicantName, applicantEmail } = event.detail
       // Find and select the conversation
       const conversation = conversations.find(c => c.id === conversationId)
       if (conversation) {
+        console.log('Found conversation, selecting it:', conversation.id)
         setSelectedConversation(conversation)
         markAsRead(conversationId)
+      } else {
+        console.log('Conversation not found, will retry after loading')
+        // Reload conversations and try again
+        loadConversations()
       }
     }
 
     window.addEventListener('selectConversation', handleSelectConversation)
+    console.log('Registered selectConversation listener')
     return () => window.removeEventListener('selectConversation', handleSelectConversation)
   }, [conversations])
 

@@ -67,15 +67,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   // Listen for navigate to messages event
   useEffect(() => {
     const handleNavigateToMessages = (event: any) => {
+      console.log('Received navigateToMessages event:', event.detail)
       setActiveTab('messages')
       // Dispatch event to MessagingPanel to select the conversation
-      const selectEvent = new CustomEvent('selectConversation', {
-        detail: event.detail
-      })
-      window.dispatchEvent(selectEvent)
+      setTimeout(() => {
+        const selectEvent = new CustomEvent('selectConversation', {
+          detail: event.detail
+        })
+        window.dispatchEvent(selectEvent)
+        console.log('Dispatched selectConversation event:', event.detail)
+      }, 100)
     }
 
     window.addEventListener('navigateToMessages', handleNavigateToMessages)
+    console.log('Registered navigateToMessages listener')
     return () => window.removeEventListener('navigateToMessages', handleNavigateToMessages)
   }, [])
 

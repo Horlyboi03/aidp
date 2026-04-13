@@ -119,10 +119,13 @@ export default function ApplicationsList({ onStatsUpdate }: ApplicationsListProp
 
       if (response.ok) {
         // Dispatch event to navigate to messages tab and open conversation
-        const event = new CustomEvent('navigateToMessages', {
-          detail: { conversationId, applicantName, applicantEmail }
-        })
-        window.dispatchEvent(event)
+        setTimeout(() => {
+          const event = new CustomEvent('navigateToMessages', {
+            detail: { conversationId, applicantName, applicantEmail }
+          })
+          window.dispatchEvent(event)
+          console.log('Dispatched navigateToMessages event:', { conversationId, applicantName, applicantEmail })
+        }, 100)
         toast.success('💬 Opening conversation...')
       } else {
         toast.error('Failed to start conversation')
