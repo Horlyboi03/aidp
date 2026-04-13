@@ -52,11 +52,12 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
           const enrolled = localStorage.getItem('adminBiometricEnrolled') === 'true'
           setBiometricEnrolled(enrolled)
           
-          // If biometric is enrolled, try auto-login
+          // If biometric is enrolled, try auto-login after a short delay
           if (enrolled && available) {
-            setTimeout(() => {
+            const timer = setTimeout(() => {
               handleBiometricLogin()
-            }, 800)
+            }, 1000)
+            return () => clearTimeout(timer)
           }
         }
       } catch (error) {
@@ -96,7 +97,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             challenge: challenge,
             allowCredentials: [
               {
-                id: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+                id: bytes as unknown as BufferSource,
                 type: 'public-key' as const,
                 transports: ['internal'] as AuthenticatorTransport[]
               }
